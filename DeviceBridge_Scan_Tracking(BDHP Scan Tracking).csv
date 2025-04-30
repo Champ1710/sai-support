@@ -1,0 +1,980 @@
+,,,,,,,,,,,,bdhp-v4.6.0,bdhp-v4.6.0-saas,,,,,,,,,,,,,,,,,,,,,,,,
+Repo Name,Container Image Name,On-Prem?,SaaS?,"On-Prem 
+or SaaS?","SAST?
+(Coverity)","SCA?
+(FOSSA)","Produces 
+Container 
+image?",SBOM?,Language,Helm Chart Name,Dockerfile Path,"On-Prem
+Version 
+to Test","SaaS
+Version 
+to Test",On-Prem matches SaaS?,"On-Prem
+FOSSA Scan Needed?","SaaS
+FOSSA Scan Needed?",FOSSA Scan Needed?,FOSSA Scan Completed?,FOSSA SBOM Created?,Git Pull Latest and Fetch,On-Prem Git Checkout Tag as Branch,SAAS Git Checkout Tag as Branch,On-Prem Snyk Version Tag,SAAS Snyk Version Tag,On-Prem Invoke-Snyk-Container-Monitor PowerShell Command,SAAS Invoke-Snyk-Container-Monitor PowerShell Command,On-Prem New-Snyk-Container-Sbom PowerShell Command,SAAS New-Snyk-Container-Sbom PowerShell Command,On-Prem fossa analyze Command,SAAS fossa analyze Command,,,,Image Name,Tag,,
+bdhp-account,bdhp-account,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-account,AccountService\Dockerfile,4.23.0,4.22.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-account && git checkout -b 4.23.0-tag-as-branch 4.23.0,cd ../bdhp-account && git checkout -b 4.23.0-tag-as-branch 4.23.0,cd ../bdhp-account && git checkout -b 4.22.0-tag-as-branch 4.22.0,version=4.23.0,version=4.22.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.23.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-account:4.23.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-account\AccountService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.22.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-account:4.22.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-account\AccountService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-account:4.23.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-account__4.23.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-account:4.22.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-account__4.22.0.json""","cd ../bdhp-account
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-account -r 4.23.0","cd ../bdhp-account
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-account -r 4.22.0",4.12.9,4.12.9,TRUE,bdhp-account,4.22.0,FALSE,4.22.0
+bdhp-adt,bdhp-adt,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-adt,ADTService\Dockerfile,5.9.0,5.9.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-adt && git pull origin dev && git fetch && git branch,cd ../bdhp-adt && git checkout -b 5.9.0-tag-as-branch 5.9.0,cd ../bdhp-adt && git checkout -b 5.9.0-tag-as-branch 5.9.0,version=5.9.0,version=5.9.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.9.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-adt:5.9.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-adt\ADTService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.9.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-adt:5.9.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-adt\ADTService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-adt:5.9.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-adt__5.9.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-adt:5.9.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-adt__5.9.0.json""","cd ../bdhp-adt
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-adt -r 5.9.0","cd ../bdhp-adt
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-adt -r 5.9.0",4.52.3,4.52.3,TRUE,bdhp-adt,5.9.0,,
+bdhp-alarm-reporter,bdhp-alarm-reporter,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-alarm-reporter,AlarmReporterService\Dockerfile,4.25.1,4.25.1,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-alarm-reporter && git pull origin dev && git fetch && git branch,cd ../bdhp-alarm-reporter && git checkout -b 4.25.1-tag-as-branch 4.25.1,cd ../bdhp-alarm-reporter && git checkout -b 4.25.1-tag-as-branch 4.25.1,version=4.25.1,version=4.25.1,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.25.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-alarm-reporter:4.25.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-alarm-reporter\AlarmReporterService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.25.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-alarm-reporter:4.25.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-alarm-reporter\AlarmReporterService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-alarm-reporter:4.25.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-alarm-reporter__4.25.1.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-alarm-reporter:4.25.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-alarm-reporter__4.25.1.json""","cd ../bdhp-alarm-reporter
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-alarm-reporter -r 4.25.1","cd ../bdhp-alarm-reporter
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-alarm-reporter -r 4.25.1",4.18.10,4.18.10,TRUE,bdhp-alarm-reporter,4.25.1,,
+bdhp-allergy-intolerance,bdhp-allergy-intolerance,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-allergy-intolerance,AllergyIntoleranceService\Dockerfile,5.14.0,5.14.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-allergy-intolerance && git pull origin dev && git fetch && git branch,cd ../bdhp-allergy-intolerance && git checkout -b 5.14.0-tag-as-branch 5.14.0,cd ../bdhp-allergy-intolerance && git checkout -b 5.14.0-tag-as-branch 5.14.0,version=5.14.0,version=5.14.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.14.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-allergy-intolerance:5.14.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-allergy-intolerance\AllergyIntoleranceService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.14.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-allergy-intolerance:5.14.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-allergy-intolerance\AllergyIntoleranceService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-allergy-intolerance:5.14.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-allergy-intolerance__5.14.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-allergy-intolerance:5.14.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-allergy-intolerance__5.14.0.json""","cd ../bdhp-allergy-intolerance
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-allergy-intolerance -r 5.14.0","cd ../bdhp-allergy-intolerance
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-allergy-intolerance -r 5.14.0",0,0,TRUE,bdhp-allergy-intolerance,5.14.0,,
+bdhp-audit-event,bdhp-audit-event,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-audit-event,AuditEventService\Dockerfile,,4.24.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-audit-event && git pull origin dev && git fetch && git branch,,cd ../bdhp-audit-event && git checkout -b 4.24.0-tag-as-branch 4.24.0,,version=4.24.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.24.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-audit-event:4.24.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-audit-event\AuditEventService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-audit-event:4.24.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-audit-event__4.24.0.json""",,"cd ../bdhp-audit-event
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-audit-event -r 4.24.0",,4.13.6,TRUE,bdhp-audit-event,4.24.0,,
+bdhp-bridge,bdhp-bridge,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-bridge,BridgeService\Dockerfile,1.5.1,,,TRUE,,TRUE,TRUE,TRUE,cd ../bdhp-bridge && git pull origin dev && git fetch && git branch,cd ../bdhp-bridge && git checkout -b 1.5.1-tag-as-branch 1.5.1,,version=1.5.1,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=1.5.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-bridge:1.5.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-bridge\BridgeService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-bridge:1.5.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-bridge__1.5.1.json""",,"cd ../bdhp-bridge
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-bridge -r 1.5.1",,0,,FALSE,,,,
+bdhp-catalog,bdhp-catalog,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-catalog,CatalogService\Dockerfile,5.78.4,5.78.4,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-catalog && git pull origin dev && git fetch && git branch,cd ../bdhp-catalog && git checkout -b 5.78.4-tag-as-branch 5.78.4,cd ../bdhp-catalog && git checkout -b 5.78.4-tag-as-branch 5.78.4,version=5.78.4,version=5.78.4,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.78.4"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog:5.78.4"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog\CatalogService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.78.4"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog:5.78.4"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog\CatalogService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog:5.78.4"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog__5.78.4.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog:5.78.4"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog__5.78.4.json""","cd ../bdhp-catalog
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog -r 5.78.4","cd ../bdhp-catalog
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog -r 5.78.4",4.138.5,4.138.5,TRUE,bdhp-catalog,5.78.2,,
+bdhp-catalog-configuration,bdhp-catalog-configuration,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-catalog-configuration,CatalogConfiguration\Dockerfile,5.16.1,5.16.1,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-catalog-configuration && git pull origin dev && git fetch && git branch,cd ../bdhp-catalog-configuration && git checkout -b 5.16.1-tag-as-branch 5.16.1,cd ../bdhp-catalog-configuration && git checkout -b 5.16.1-tag-as-branch 5.16.1,version=5.16.1,version=5.16.1,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.16.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-configuration:5.16.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog-configuration\CatalogConfiguration\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.16.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-configuration:5.16.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog-configuration\CatalogConfiguration\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-configuration:5.16.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog-configuration__5.16.1.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-configuration:5.16.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog-configuration__5.16.1.json""","cd ../bdhp-catalog-configuration
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog-configuration -r 5.16.1","cd ../bdhp-catalog-configuration
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog-configuration -r 5.16.1",4.43.5,4.43.5,FALSE,,,,
+bdhp-catalog-service-jobs,bdhp-catalog-service-jobs,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-catalog-service-jobs,CatalogServiceJobs\Dockerfile,4.3.1,4.3.1,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-catalog-service-jobs && git pull origin dev && git fetch && git branch,cd ../bdhp-catalog-service-jobs && git checkout -b 4.3.1-tag-as-branch 4.3.1,cd ../bdhp-catalog-service-jobs && git checkout -b 4.3.1-tag-as-branch 4.3.1,version=4.3.1,version=4.3.1,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.3.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-service-jobs:4.3.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog-service-jobs\CatalogServiceJobs\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.3.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-service-jobs:4.3.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-catalog-service-jobs\CatalogServiceJobs\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-service-jobs:4.3.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog-service-jobs__4.3.1.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-catalog-service-jobs:4.3.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-catalog-service-jobs__4.3.1.json""","cd ../bdhp-catalog-service-jobs
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog-service-jobs -r 4.3.1","cd ../bdhp-catalog-service-jobs
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-catalog-service-jobs -r 4.3.1",4.2.3,4.2.3,TRUE,bdhp-catalog-service-jobs,4.3.1,,
+bdhp-clamav,bdhp-clamav,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Shell,bdhp-clamav,clamav\Dockerfile,4.14.8,4.14.8,TRUE,,,,,,,,,version=4.14.8,version=4.14.8,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.14.8"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-clamav:4.14.8"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-clamav\clamav\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.14.8"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-clamav:4.14.8"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-clamav\clamav\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-clamav:4.14.8"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-clamav__4.14.8.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-clamav:4.14.8"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-clamav__4.14.8.json""",,,4.14.4,4.14.4,TRUE,bdhp-clamav,4.14.8,,
+bdhp-communication,bdhp-communication,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-communication,CommunicationService\Dockerfile,4.32.2,4.26.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-communication && git pull origin dev && git fetch && git branch,cd ../bdhp-communication && git checkout -b 4.32.2-tag-as-branch 4.32.2,cd ../bdhp-communication && git checkout -b 4.26.0-tag-as-branch 4.26.0,version=4.32.2,version=4.26.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.32.2"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-communication:4.32.2"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-communication\CommunicationService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.26.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-communication:4.26.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-communication\CommunicationService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-communication:4.32.2"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-communication__4.32.2.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-communication:4.26.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-communication__4.26.0.json""","cd ../bdhp-communication
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-communication -r 4.32.2","cd ../bdhp-communication
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-communication -r 4.26.0",4.16.6,4.16.6,TRUE,bdhp-communication,4.26.0,,
+bdhp-dbmigration-base,bdhp-dbmigration-base,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,,DbService.Data.Migrations\Dockerfile,4.12.0,4.3.5,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-dbmigration-base && git pull origin dev && git fetch && git branch,cd ../bdhp-dbmigration-base && git checkout -b 4.12.0-tag-as-branch 4.12.0,cd ../bdhp-dbmigration-base && git checkout -b 4.3.5-tag-as-branch 4.3.5,version=4.12.0,version=4.3.5,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.12.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dbmigration-base:4.12.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-dbmigration-base\DbService.Data.Migrations\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.3.5"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dbmigration-base:4.3.5"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-dbmigration-base\DbService.Data.Migrations\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dbmigration-base:4.12.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-dbmigration-base__4.12.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dbmigration-base:4.3.5"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-dbmigration-base__4.3.5.json""","cd ../bdhp-dbmigration-base
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-dbmigration-base -r 4.12.0","cd ../bdhp-dbmigration-base
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-dbmigration-base -r 4.3.5",0,0,FALSE,bdhp-device,4.26.0,,
+bdhp-device,bdhp-device,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-device,DeviceService\Dockerfile,4.28.0,4.26.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-device && git pull origin dev && git fetch && git branch,cd ../bdhp-device && git checkout -b 4.28.0-tag-as-branch 4.28.0,cd ../bdhp-device && git checkout -b 4.26.0-tag-as-branch 4.26.0,version=4.28.0,version=4.26.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.28.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device:4.28.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device\DeviceService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.26.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device:4.26.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device\DeviceService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device:4.28.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device__4.28.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device:4.26.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device__4.26.0.json""","cd ../bdhp-device
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device -r 4.28.0","cd ../bdhp-device
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device -r 4.26.0",4.17.9,4.17.9,FALSE,bdhp-device-gateway,4.19.0,,
+bdhp-device-gateway,bdhp-device-gateway,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-device-gateway,DeviceGatewayService\Dockerfile,4.19.0,4.19.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-device-gateway && git pull origin dev && git fetch && git branch,cd ../bdhp-device-gateway && git checkout -b 4.19.0-tag-as-branch 4.19.0,cd ../bdhp-device-gateway && git checkout -b 4.19.0-tag-as-branch 4.19.0,version=4.19.0,version=4.19.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.19.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway:4.19.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device-gateway\DeviceGatewayService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.19.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway:4.19.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device-gateway\DeviceGatewayService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway:4.19.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device-gateway__4.19.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway:4.19.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device-gateway__4.19.0.json""","cd ../bdhp-device-gateway
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device-gateway -r 4.19.0","cd ../bdhp-device-gateway
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device-gateway -r 4.19.0",4.12.3,4.12.3,FALSE,bdhp-device-gateway-engine,5.13.10,,
+bdhp-device-gateway-engine,bdhp-device-gateway-engine,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-device-gateway-engine,DeviceGatewayEngine\Dockerfile,5.19.0,5.13.10,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-device-gateway-engine && git pull origin dev && git fetch && git branch,cd ../bdhp-device-gateway-engine && git checkout -b 5.19.0-tag-as-branch 5.19.0,cd ../bdhp-device-gateway-engine && git checkout -b 5.13.10-tag-as-branch 5.13.10,version=5.19.0,version=5.13.10,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.19.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway-engine:5.19.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device-gateway-engine\DeviceGatewayEngine\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.13.10"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway-engine:5.13.10"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-device-gateway-engine\DeviceGatewayEngine\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway-engine:5.19.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device-gateway-engine__5.19.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-device-gateway-engine:5.13.10"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-device-gateway-engine__5.13.10.json""","cd ../bdhp-device-gateway-engine
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device-gateway-engine -r 5.19.0","cd ../bdhp-device-gateway-engine
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-device-gateway-engine -r 5.13.10",4.16.2,4.16.2,FALSE,,,,
+bdhp-dotnet-base,bdhp-dotnet-base,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Dockerfile,,Dockerfile,8.0.6,6.0.7,FALSE,,,,,,,,,version=8.0.6,version=6.0.7,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=8.0.6"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dotnet-base:8.0.6"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-dotnet-base\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=6.0.7"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dotnet-base:6.0.7"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-dotnet-base\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dotnet-base:8.0.6"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-dotnet-base__8.0.6.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-dotnet-base:6.0.7"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-dotnet-base__6.0.7.json""",,,0,0,FALSE,,,,
+bdhp-dotnet-base-debian,bdhp-dotnet-base-debian,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Dockerfile,,Dockerfile,,,TRUE,,,,,,,,,,version=,,,,,,,,,,,,,
+bdhp-enterprise-configuration,bdhp-ecp-ui,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,JavaScript,bdhp-ecp-ui,EnterpriseConfiguration\Dockerfile,5.4.9,5.4.9,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-enterprise-configuration && git pull origin dev && git fetch && git branch,cd ../bdhp-enterprise-configuration && git checkout -b 5.4.9-tag-as-branch 5.4.9,cd ../bdhp-enterprise-configuration && git checkout -b 5.4.9-tag-as-branch 5.4.9,version=5.4.9,version=5.4.9,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.4.9"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ecp-ui:5.4.9"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-enterprise-configuration\EnterpriseConfiguration\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.4.9"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ecp-ui:5.4.9"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-enterprise-configuration\EnterpriseConfiguration\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ecp-ui:5.4.9"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-ecp-ui__5.4.9.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ecp-ui:5.4.9"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-ecp-ui__5.4.9.json""","cd ../bdhp-enterprise-configuration/EnterpriseConfiguration
+npm i --lockfile-version 2 --package-lock-only
+cd ..
+fossa analyze -T BDHP -t bdhp-enterprise-configuration -r 5.4.9","cd ../bdhp-enterprise-configuration/EnterpriseConfiguration
+npm i --lockfile-version 2 --package-lock-only
+cd ..
+fossa analyze -T BDHP -t bdhp-enterprise-configuration -r 5.4.9",4.76.0,4.76.0,FALSE,bdhp-emr-vitals,4.17.0,,
+bdhp-emr-vitals-service,bdhp-emr-vitals,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-emr-vitals,EMRVitals\Dockerfile,4.17.0,4.17.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-emr-vitals-service && git pull origin dev && git fetch && git branch,cd ../bdhp-emr-vitals-service && git checkout -b 4.17.0-tag-as-branch 4.17.0,cd ../bdhp-emr-vitals-service && git checkout -b 4.17.0-tag-as-branch 4.17.0,version=4.17.0,version=4.17.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.17.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-emr-vitals:4.17.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-emr-vitals-service\EMRVitals\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.17.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-emr-vitals:4.17.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-emr-vitals-service\EMRVitals\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-emr-vitals:4.17.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-emr-vitals__4.17.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-emr-vitals:4.17.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-emr-vitals__4.17.0.json""","cd ../bdhp-emr-vitals-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-emr-vitals-service -r 4.17.0","cd ../bdhp-emr-vitals-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-emr-vitals-service -r 4.17.0",4.10.2,4.10.2,FALSE,bdhp-encounter,4.24.0,,
+bdhp-encounter,bdhp-encounter,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-encounter,EncounterService\Dockerfile,4.56.0,4.24.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-encounter && git pull origin dev && git fetch && git branch,cd ../bdhp-encounter && git checkout -b 4.56.0-tag-as-branch 4.56.0,cd ../bdhp-encounter && git checkout -b 4.24.0-tag-as-branch 4.24.0,version=4.56.0,version=4.24.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.56.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-encounter:4.56.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-encounter\EncounterService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.24.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-encounter:4.24.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-encounter\EncounterService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-encounter:4.56.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-encounter__4.56.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-encounter:4.24.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-encounter__4.24.0.json""","cd ../bdhp-encounter
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-encounter -r 4.56.0","cd ../bdhp-encounter
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-encounter -r 4.24.0",4.13.10,4.13.10,FALSE,,,,
+bdhp-enterprise-gateway,bdhp-enterprise-gateway,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Dockerfile,bdhp-enterprise-gateway,bdhp-enterprise-gateway\Dockerfile,4.96.0,4.96.0,TRUE,,,,,,,,,version=4.96.0,version=4.96.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.96.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-enterprise-gateway:4.96.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-enterprise-gateway\bdhp-enterprise-gateway\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.96.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-enterprise-gateway:4.96.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-enterprise-gateway\bdhp-enterprise-gateway\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-enterprise-gateway:4.96.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-enterprise-gateway__4.96.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-enterprise-gateway:4.96.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-enterprise-gateway__4.96.0.json""",,,4.76.0,4.76.0,FALSE,bdhp-group,4.24.0,,
+bdhp-group,bdhp-group,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-group,GroupService\Dockerfile,,4.24.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-group && git pull origin dev && git fetch && git branch,,cd ../bdhp-group && git checkout -b 4.24.0-tag-as-branch 4.24.0,,version=4.24.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.24.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-group:4.24.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-group\GroupService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-group:4.24.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-group__4.24.0.json""",,"cd ../bdhp-group
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-group -r 4.24.0",,4.14.6,FALSE,bdhp-hl7outbound,4.23.0,,
+bdhp-hl7-bed-outbound-service,bdhp-hl7outbound,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-hl7outbound,RabbitMQHL7Service\Dockerfile,4.23.0,4.23.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-hl7-bed-outbound-service && git pull origin dev && git fetch && git branch,cd ../bdhp-hl7-bed-outbound-service && git checkout -b 4.23.0-tag-as-branch 4.23.0,cd ../bdhp-hl7-bed-outbound-service && git checkout -b 4.23.0-tag-as-branch 4.23.0,version=4.23.0,version=4.23.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.23.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-hl7outbound:4.23.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-hl7-bed-outbound-service\RabbitMQHL7Service\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.23.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-hl7outbound:4.23.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-hl7-bed-outbound-service\RabbitMQHL7Service\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-hl7outbound:4.23.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-hl7outbound__4.23.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-hl7outbound:4.23.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-hl7outbound__4.23.0.json""","cd ../bdhp-hl7-bed-outbound-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-hl7-bed-outbound-service -r 4.23.0","cd ../bdhp-hl7-bed-outbound-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-hl7-bed-outbound-service -r 4.23.0",4.16.2,4.16.2,FALSE,bdhp-iqecs,6.24.20,,
+bdhp-iqecs,bdhp-iqecs,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,PHP,bdhp-iqecs,Dockerfile,6.32.1,6.24.20,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-iqecs && git pull origin dev && git fetch && git branch,cd ../bdhp-iqecs && git checkout -b 6.32.1-tag-as-branch 6.32.1,cd ../bdhp-iqecs && git checkout -b 6.24.20-tag-as-branch 6.24.20,version=6.32.1,version=6.24.20,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=6.32.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-iqecs:6.32.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-iqecs\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=6.24.20"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-iqecs:6.24.20"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-iqecs\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-iqecs:6.32.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-iqecs__6.32.1.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-iqecs:6.24.20"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-iqecs__6.24.20.json""","cd ../bdhp-iqecs
+fossa analyze -T BDHP -t bdhp-iqecs -r 6.32.1","cd ../bdhp-iqecs
+fossa analyze -T BDHP -t bdhp-iqecs -r 6.24.20",6.17.1,6.17.1,FALSE,bdhp-k8s-cluster-config-sync-operator,2.6.5,,
+bdhp-k8s-cluster-config-sync-operator,bdhp-k8s-cluster-config-sync-operator,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,Python,bdhp-k8s-cluster-config-sync-operator,k8s-cluster-config-sync-operator\Dockerfile,,2.6.5,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-k8s-cluster-config-sync-operator && git pull origin dev && git fetch && git branch,,cd ../bdhp-k8s-cluster-config-sync-operator && git checkout -b 2.6.5-tag-as-branch,,version=2.6.5,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=2.6.5"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-k8s-cluster-config-sync-operator:2.6.5"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-k8s-cluster-config-sync-operator\k8s-cluster-config-sync-operator\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-k8s-cluster-config-sync-operator:2.6.5"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-k8s-cluster-config-sync-operator__2.6.5.json""",,"cd ../bdhp-k8s-cluster-config-sync-operator
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-k8s-cluster-config-sync-operator -r 2.6.5",,2.6.1,FALSE,,,,
+bdhp-keycloak,bdhp-keycloak-mysql,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,TRUE,"bin: Shell
+keycloak-themes: JS
+spi: JAR
+translations:PHP",bdhp-keycloak-mysql,keycloak\Dockerfile,5.9.5,,,,,,,,,,,version=5.9.5,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.9.5"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-mysql:5.9.5"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-keycloak\keycloak\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-mysql:5.9.5"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-keycloak-mysql__5.9.5.json""",,,,5.5.0,,FALSE,bdhp-keycloak-postgresql,5.9.5,,
+bdhp-keycloak,bdhp-keycloak-postgresql,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,"bin: Shell
+keycloak-themes: JS
+spi: JAR
+translations:PHP",bdhp-keycloak-postgresql,keycloak\Dockerfile,5.9.5,5.9.5,TRUE,,,,,,,,,version=5.9.5,version=5.9.5,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.9.5"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-postgresql:5.9.5"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-keycloak\keycloak\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.9.5"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-postgresql:5.9.5"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-keycloak\keycloak\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-postgresql:5.9.5"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-keycloak-postgresql__5.9.5.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-keycloak-postgresql:5.9.5"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-keycloak-postgresql__5.9.5.json""",,,5.5.0,0,FALSE,bdhp-lightning-bolt,4.17.0,,
+bdhp-lightning-bolt,bdhp-lightning-bolt,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-lightning-bolt,LightningBoltService\Dockerfile,,4.17.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-lightning-bolt && git pull origin dev && git fetch && git branch,,cd ../bdhp-lightning-bolt && git checkout -b 4.17.0-tag-as-branch,,version=4.17.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.17.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-lightning-bolt:4.17.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-lightning-bolt\LightningBoltService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-lightning-bolt:4.17.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-lightning-bolt__4.17.0.json""",,"cd ../bdhp-lightning-bolt
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-lightning-bolt -r 4.17.0",,4.7.4,FALSE,bdhp-location,4.30.1,,
+bdhp-location,bdhp-location,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-location,LocationService\Dockerfile,4.36.0,4.30.1,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-location && git pull origin dev && git fetch && git branch,cd ../bdhp-location && git checkout -b 4.36.0-tag-as-branch 4.36.0,cd ../bdhp-location && git checkout -b 4.30.1-tag-as-branch 4.30.1,version=4.36.0,version=4.30.1,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.36.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-location:4.36.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-location\LocationService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.30.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-location:4.30.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-location\LocationService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-location:4.36.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-location__4.36.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-location:4.30.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-location__4.30.1.json""","cd ../bdhp-location
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-location -r 4.36.0","cd ../bdhp-location
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-location -r 4.30.1",4.19.9,4.19.9,FALSE,bdhp-manual-adt-backend,4.16.0,,
+bdhp-manual-adt-backend,bdhp-manual-adt-backend,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-manual-adt-backend,AdmitPatientService\Dockerfile,4.16.0,4.16.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-manual-adt-backend && git pull origin dev && git fetch && git branch,cd ../bdhp-manual-adt-backend && git checkout -b 4.16.0-tag-as-branch 4.16.0,cd ../bdhp-manual-adt-backend && git checkout -b 4.16.0-tag-as-branch 4.16.0,version=4.16.0,version=4.16.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.16.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-backend:4.16.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-manual-adt-backend\AdmitPatientService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.16.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-backend:4.16.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-manual-adt-backend\AdmitPatientService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-backend:4.16.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-manual-adt-backend__4.16.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-backend:4.16.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-manual-adt-backend__4.16.0.json""","cd ../bdhp-manual-adt-backend
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-manual-adt-backend -r 4.16.0","cd ../bdhp-manual-adt-backend
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-manual-adt-backend -r 4.16.0",4.9.9,4.9.9,FALSE,bdhp-manual-adt-ui,4.9.1,,
+bdhp-manual-adt-ui,bdhp-manual-adt-ui,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,JavaScript,bdhp-manual-adt-ui,ManualAdtUIService\Dockerfile,4.9.1,4.9.1,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-manual-adt-ui && git pull origin dev && git fetch && git branch,cd ../bdhp-manual-adt-ui && git checkout -b 4.9.1-tag-as-branch 4.9.1,cd ../bdhp-manual-adt-ui && git checkout -b 4.9.1-tag-as-branch 4.9.1,version=4.9.1,version=4.9.1,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.9.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-ui:4.9.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-manual-adt-ui\ManualAdtUIService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.9.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-ui:4.9.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-manual-adt-ui\ManualAdtUIService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-ui:4.9.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-manual-adt-ui__4.9.1.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-manual-adt-ui:4.9.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-manual-adt-ui__4.9.1.json""","cd ../bdhp-manual-adt-ui/ManualAdtUIService/web
+npm i --lockfile-version 2 --package-lock-only
+cd ../..
+fossa analyze -T BDHP -t bdhp-manual-adt-ui -r 4.9.1","cd ../bdhp-manual-adt-ui/ManualAdtUIService/web
+npm i --lockfile-version 2 --package-lock-only
+cd ../..
+fossa analyze -T BDHP -t bdhp-manual-adt-ui -r 4.9.1",4.3.19,4.3.19,FALSE,,,,
+bdhp-metrics,bdhp-metrics,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,Python,bdhp-metrics,Metrics\Dockerfile,4.3.0,,,FALSE,,FALSE,TRUE,TRUE,cd ../bdhp-metrics && git pull origin dev && git fetch && git branch,cd ../bdhp-metrics && git checkout -b 4.3.0-tag-as-branch 4.3.0,,version=4.3.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.3.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-metrics:4.3.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-metrics\Metrics\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-metrics:4.3.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-metrics__4.3.0.json""",,"cd ../bdhp-metrics
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-metrics -r 4.3.0",,4.2.3,,FALSE,bdhp-mirth-sidecar,4.25.11,,
+bdhp-mirth,bdhp-mirth-sidecar,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,JAR/Shell,bdhp-mirth-sidecar,bdhp-mirth-sidecar\Dockerfile,4.29.0,4.25.11,FALSE,,,,,,,,,version=4.29.0,version=4.25.11,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.29.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-mirth-sidecar:4.29.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-mirth\bdhp-mirth-sidecar\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.25.11"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-mirth-sidecar:4.25.11"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-mirth\bdhp-mirth-sidecar\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-mirth-sidecar:4.29.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-mirth-sidecar__4.29.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-mirth-sidecar:4.25.11"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-mirth-sidecar__4.25.11.json""",,,4.25.0,4.25.0,FALSE,,,,
+bdhp-neo4j-cluster,bdhp-neo4j-cluster,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,TRUE,Shell,bdhp-neo4j-cluster,neo4j\Dockerfile,1.6.1,,,,,,,,,,,version=1.6.1,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=1.6.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-neo4j-cluster:1.6.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-neo4j-cluster\neo4j\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-neo4j-cluster:1.6.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-neo4j-cluster__1.6.1.json""",,,,1.4.9,,FALSE,,,,
+bdhp-ntpd,bdhp-ntpd,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,TRUE,Dockerfile,bdhp-ntpd,ntpd\Dockerfile,1.16.3,,,,,,,,,,,version=1.16.3,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=1.16.3"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ntpd:1.16.3"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-ntpd\ntpd\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-ntpd:1.16.3"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-ntpd__1.16.3.json""",,,,1.16.3,,FALSE,bdhp-observation,4.37.2,,
+bdhp-observation,bdhp-observation,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-observation,ObservationService\Dockerfile,4.38.0,4.37.2,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-observation && git pull origin dev && git fetch && git branch,cd ../bdhp-observation && git checkout -b 4.38.0-tag-as-branch 4.38.0,cd ../bdhp-observation && git checkout -b 4.37.2-tag-as-branch 4.37.2,version=4.38.0,version=4.37.2,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.38.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-observation:4.38.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-observation\ObservationService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.37.2"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-observation:4.37.2"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-observation\ObservationService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-observation:4.38.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-observation__4.38.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-observation:4.37.2"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-observation__4.37.2.json""","cd ../bdhp-observation
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-observation -r 4.38.0","cd ../bdhp-observation
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-observation -r 4.37.2",4.22.8,4.22.8,FALSE,bdhp-on-call-scheduling,4.14.0,,
+bdhp-on-call-scheduling,bdhp-on-call-scheduling,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-on-call-scheduling,OnCallSchedulingService\Dockerfile,,4.14.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-on-call-scheduling && git pull origin dev && git fetch && git branch,,cd ../bdhp-on-call-scheduling && git checkout -b 4.14.0-tag-as-branch,,version=4.14.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.14.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-on-call-scheduling:4.14.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-on-call-scheduling\OnCallSchedulingService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-on-call-scheduling:4.14.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-on-call-scheduling__4.14.0.json""",,"cd ../bdhp-on-call-scheduling
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-on-call-scheduling -r 4.14.0",,4.7.4,FALSE,bdhp-organization,4.25.0,,
+bdhp-organization,bdhp-organization,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-organization,OrganizationService\Dockerfile,,4.25.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-organization && git pull origin dev && git fetch && git branch,,cd ../bdhp-organization && git checkout -b 4.25.0-tag-as-branch 4.25.0,,version=4.25.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.25.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-organization:4.25.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-organization\OrganizationService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-organization:4.25.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-organization__4.25.0.json""",,"cd ../bdhp-organization
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-organization -r 4.25.0",,4.15.6,FALSE,bdhp-patient,4.41.0,,
+bdhp-patient,bdhp-patient,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-patient,PatientService\Dockerfile,4.42.0,4.41.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-patient && git pull origin dev && git fetch && git branch,cd ../bdhp-patient && git checkout -b 4.42.0-tag-as-branch 4.42.0,cd ../bdhp-patient && git checkout -b 4.41.0-tag-as-branch 4.41.0,version=4.42.0,version=4.41.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.42.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-patient:4.42.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-patient\PatientService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.41.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-patient:4.41.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-patient\PatientService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-patient:4.42.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-patient__4.42.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-patient:4.41.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-patient__4.41.0.json""","cd ../bdhp-patient
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-patient -r 4.42.0","cd ../bdhp-patient
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-patient -r 4.41.0",4.20.8,4.20.8,FALSE,bdhp-practitioner,4.29.0,,
+bdhp-practitioner,bdhp-practitioner,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-practitioner,PractitionerService\Dockerfile,4.30.0,4.29.0,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-practitioner && git pull origin dev && git fetch && git branch,cd ../bdhp-practitioner && git checkout -b 4.30.0-tag-as-branch 4.30.0,cd ../bdhp-practitioner && git checkout -b 4.29.0-tag-as-branch 4.29.0,version=4.30.0,version=4.29.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.30.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner:4.30.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-practitioner\PractitionerService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.29.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner:4.29.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-practitioner\PractitionerService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner:4.30.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-practitioner__4.30.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner:4.29.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-practitioner__4.29.0.json""","cd ../bdhp-practitioner
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-practitioner -r 4.30.0","cd ../bdhp-practitioner
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-practitioner -r 4.29.0",4.19.8,4.19.8,FALSE,bdhp-practitioner-role,4.26.0,,
+bdhp-practitioner-role,bdhp-practitioner-role,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-practitioner-role,PractitionerRoleService\Dockerfile,,4.26.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-practitioner-role && git pull origin dev && git fetch && git branch,,cd ../bdhp-practitioner-role && git checkout -b 4.26.0-tag-as-branch 4.26.0,,version=4.26.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.26.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner-role:4.26.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-practitioner-role\PractitionerRoleService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-practitioner-role:4.26.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-practitioner-role__4.26.0.json""",,"cd ../bdhp-practitioner-role
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-practitioner-role -r 4.26.0",,4.16.8,FALSE,bdhp-procedure-request,5.13.0,,
+bdhp-procedure-request,bdhp-procedure-request,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-procedure-request,ProcedureRequestService\Dockerfile,5.13.0,5.13.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-procedure-request && git pull origin dev && git fetch && git branch,cd ../bdhp-procedure-request && git checkout -b 5.13.0-tag-as-branch 5.13.0,cd ../bdhp-procedure-request && git checkout -b 5.13.0-tag-as-branch 5.13.0,version=5.13.0,version=5.13.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=5.13.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-procedure-request:5.13.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-procedure-request\ProcedureRequestService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.13.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-procedure-request:5.13.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-procedure-request\ProcedureRequestService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-procedure-request:5.13.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-procedure-request__5.13.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-procedure-request:5.13.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-procedure-request__5.13.0.json""","cd ../bdhp-procedure-request
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-procedure-request -r 5.13.0","cd ../bdhp-procedure-request
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-procedure-request -r 5.13.0",0,0,FALSE,,,,
+bdhp-provisioner,bdhp-provisioner,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,PHP,bdhp-provisioner,provisioner\Dockerfile,6.11.0,6.9.2,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,cd ../bdhp-provisioner && git pull origin dev && git fetch && git branch,cd ../bdhp-provisioner && git checkout -b 6.11.0-tag-as-branch 6.11.0,cd ../bdhp-provisioner && git checkout -b 6.9.2-tag-as-branch 6.9.2,version=6.11.0,version=6.9.2,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=6.11.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-provisioner:6.11.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-provisioner\provisioner\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=6.9.2"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-provisioner:6.9.2"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-provisioner\provisioner\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-provisioner:6.11.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-provisioner__6.11.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-provisioner:6.9.2"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-provisioner__6.9.2.json""","cd ../bdhp-provisioner
+fossa analyze -T BDHP -t bdhp-provisioner -r 6.11.0","cd ../bdhp-provisioner
+fossa analyze -T BDHP -t bdhp-provisioner -r 6.9.2",5.11.6,5.11.6,FALSE,bdhp-publisher,4.27.0,,
+bdhp-provisioner-operator,bdhp-provisioner-operator,TRUE,,TRUE,TRUE,TRUE,TRUE,TRUE,PHP,bdhp-provisioner-operator,Dockerfile,0.4.1,,,,,,,,cd ../bdhp-provisioner-operator && git pull origin dev && git fetch && git branch,cd ../bdhp-provisioner-operator && git checkout -b 0.4.1-tag-as-branch 0.4.1,,version=0.4.1,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=0.4.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-provisioner-operator:0.4.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-provisioner-operator\Dockerfile""",,,,,,,,,,,,
+bdhp-publisher,bdhp-publisher,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-publisher,PublisherService\Dockerfile,4.27.0,4.27.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-publisher && git pull origin dev && git fetch && git branch,cd ../bdhp-publisher && git checkout -b 4.27.0-tag-as-branch 4.27.0,cd ../bdhp-publisher && git checkout -b 4.27.0-tag-as-branch 4.27.0,version=4.27.0,version=4.27.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.27.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-publisher:4.27.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-publisher\PublisherService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.27.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-publisher:4.27.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-publisher\PublisherService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-publisher:4.27.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-publisher__4.27.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-publisher:4.27.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-publisher__4.27.0.json""","cd ../bdhp-publisher
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-publisher -r 4.27.0","cd ../bdhp-publisher
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-publisher -r 4.27.0",4.20.3,4.20.3,FALSE,bdhp-qgenda,4.15.0,,
+bdhp-qgenda,bdhp-qgenda,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-qgenda,QGendaService\Dockerfile,,4.15.0,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-qgenda && git pull origin dev && git fetch && git branch,,cd ../bdhp-qgenda && git checkout -b 4.15.0-tag-as-branch,,version=4.15.0,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.15.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-qgenda:4.15.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-qgenda\QGendaService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-qgenda:4.15.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-qgenda__4.15.0.json""",,"cd ../bdhp-qgenda
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-qgenda -r 4.15.0",,4.8.4,FALSE,bdhp-rabbit-watcher,4.93.0,,
+bdhp-reference-updater,bdhp-reference-updater,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-reference-updater,ReferenceUpdaterService\Dockerfile,4.14.0,4.14.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-reference-updater && git pull origin dev && git fetch && git branch,cd ../bdhp-reference-updater && git checkout -b 4.14.0-tag-as-branch 4.14.0,cd ../bdhp-reference-updater && git checkout -b 4.14.0-tag-as-branch 4.14.0,version=4.14.0,version=4.14.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.14.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-reference-updater:4.14.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-reference-updater\ReferenceUpdaterService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.14.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-reference-updater:4.14.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-reference-updater\ReferenceUpdaterService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-reference-updater:4.14.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-reference-updater__4.14.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-reference-updater:4.14.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-reference-updater__4.14.0.json""","cd ../bdhp-reference-updater
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-reference-updater -r 4.14.0","cd ../bdhp-reference-updater
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-reference-updater -r 4.14.0",4.5.10,4.5.10,FALSE,bdhp-schedule,5.11.1,,
+bdhp-schedule,bdhp-schedule,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-schedule,ScheduleService\Dockerfile,,5.11.1,,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-schedule && git pull origin dev && git fetch && git branch,,cd ../bdhp-schedule && git checkout -b 5.11.1-tag-as-branch 5.11.1,,version=5.11.1,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=5.11.1"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-schedule:5.11.1"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-schedule\ScheduleService\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-schedule:5.11.1"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-schedule__5.11.1.json""",,"cd ../bdhp-schedule
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-schedule -r 5.11.1",,4.11.6,FALSE,bdhp-terminology,4.62.0,,
+bdhp-terminology-service,bdhp-terminology,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-terminology,TerminologyService\Dockerfile,4.62.0,4.62.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-terminology-service && git pull origin dev && git fetch && git branch,cd ../bdhp-terminology-service && git checkout -b 4.62.0-tag-as-branch 4.62.0,cd ../bdhp-terminology-service && git checkout -b 4.62.0-tag-as-branch 4.62.0,version=4.62.0,version=4.62.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.62.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-terminology:4.62.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-terminology-service\TerminologyService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.62.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-terminology:4.62.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-terminology-service\TerminologyService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-terminology:4.62.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-terminology__4.62.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-terminology:4.62.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-terminology__4.62.0.json""","cd ../bdhp-terminology-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-terminology-service -r 4.62.0","cd ../bdhp-terminology-service
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-terminology-service -r 4.62.0",4.54.2,4.54.2,FALSE,bdhp-vernemq,1.12.3,,
+bdhp-vernemq,bdhp-vernemq,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Shell,bdhp-vernemq,bdhp-vernemq\Dockerfile,1.12.3,1.12.3,TRUE,,,,,,,,,version=1.12.3,version=1.12.3,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=1.12.3"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq:1.12.3"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vernemq\bdhp-vernemq\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=1.12.3"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq:1.12.3"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vernemq\bdhp-vernemq\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq:1.12.3"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vernemq__1.12.3.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq:1.12.3"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vernemq__1.12.3.json""",,,1.12.0,1.12.0,FALSE,,,,
+bdhp-vernemq-pumps,bdhp-vernemq-pumps,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Shell,bdhp-vernemq-pumps,bdhp-vernemq-pumps\Dockerfile,4.18.7,4.18.7,TRUE,,,,,,,,,version=4.18.7,version=4.18.7,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.18.7"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq-pumps:4.18.7"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vernemq-pumps\bdhp-vernemq-pumps\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.18.7"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq-pumps:4.18.7"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vernemq-pumps\bdhp-vernemq-pumps\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq-pumps:4.18.7"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vernemq-pumps__4.18.7.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vernemq-pumps:4.18.7"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vernemq-pumps__4.18.7.json""",,,4.16.1,4.16.0,FALSE,bdhp-vitals-outbound,4.21.0,,
+bdhp-vitals-outbound,bdhp-vitals-outbound,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,C#,bdhp-vitals-outbound,VitalsOutboundService\Dockerfile,4.21.0,4.21.0,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-vitals-outbound && git pull origin dev && git fetch && git branch,cd ../bdhp-vitals-outbound && git checkout -b 4.21.0-tag-as-branch 4.21.0,cd ../bdhp-vitals-outbound && git checkout -b 4.21.0-tag-as-branch 4.21.0,version=4.21.0,version=4.21.0,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0"" `
+    -tags ""version=4.21.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vitals-outbound:4.21.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vitals-outbound\VitalsOutboundService\Dockerfile""","Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=4.21.0"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vitals-outbound:4.21.0"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-vitals-outbound\VitalsOutboundService\Dockerfile""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vitals-outbound:4.21.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\On-Prem\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vitals-outbound__4.21.0.json""","New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/bdhp-vitals-outbound:4.21.0"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_bdhp-vitals-outbound__4.21.0.json""","cd ../bdhp-vitals-outbound
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-vitals-outbound -r 4.21.0","cd ../bdhp-vitals-outbound
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-vitals-outbound -r 4.21.0",4.14.2,4.14.2,FALSE,clamav-mirror,1.2.2,,
+bdhp-clamav-mirror,clamav-mirror,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,Shell,clamav-mirror,bdhp-clamav-mirror\Dockerfile,,1.2.2,,,,,,,,,,,version=1.2.2,,"Invoke-Snyk-Container-Monitor `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -tags ""version=1.2.2"" `
+    -image ""bdhpcr.azurecr.io/images/clamav-mirror:1.2.2"" `
+    -dockerfilePath ""\repos\github-hillrom\bdhp\bdhp-clamav-mirror\bdhp-clamav-mirror\Dockerfile""",,"New-Snyk-Container-Sbom `
+    -organization ""bdhp-v4.6.0-saas"" `
+    -sbomFormat ""cyclonedx1.6+json"" `
+    -image ""bdhpcr.azurecr.io/images/clamav-mirror:1.2.2"" `
+    -outputPath ""\Users\mallmaj\Desktop\BDHP-4.6.0\SAAS\SBOMs\bdhp_container\Snyk_container_SBOM_bdhpcr.azurecr.io__images_clamav-mirror__1.2.2.json""",,,,1.2.0,FALSE,,,,
+bdhp-catalog-crd,,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,Helm,bdhp-catalog-crd,,,,,,,,,,,,,,,,,,,,,,,TRUE,,,,
+bdhp-core,,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE,C#,,,5.26.0,5.26.0,TRUE,,TRUE,TRUE,TRUE,TRUE,cd ../bdhp-core && git pull origin dev && git fetch && git branch,cd ../bdhp-core && git checkout -b 5.26.0-tag-as-branch 5.26.0,cd ../bdhp-core && git checkout -b 5.26.0-tag-as-branch 5.26.0,,,,,,,"cd ../bdhp-core
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-core -r 5.26.0","cd ../bdhp-core
+dotnet clean -c Release
+dotnet build -c Release
+fossa analyze -T BDHP -t bdhp-core -r 5.26.0",4.26.1,4.26.1,TRUE,,,,
+bdhp-rabbitmq,,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,Helm,bdhp-rabbitmq,,,,,,,,,,,,,,,,,,,,,,,TRUE,,,,
