@@ -1,0 +1,32 @@
+# https://aka.ms/yaml
+# File: azure-pipelines-build.yml
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+    - dev
+    - release/*
+  paths:
+    exclude:
+    - azure-pipelines-release.yml
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: 'Hillrom-Enterprise/bdhp-platform'
+      ref: 'refs/heads/investigation/static_docker_version'
+      endpoint: 'Hillrom-Enterprise-IAC - BDHP'
+
+pool:
+  vmImage: ubuntu-latest
+
+
+extends:
+  template: workflow-templates/ci-cd/build/stages/build_stage.yaml@templates  # Template reference
+  parameters:
+    docker: 'true'
+    helm: ${{ not(startsWith(variables['Build.SourceBranchName'], 'investigation/')) }}
+    runMasterHelmChartPipeline: ${{ not(startsWith(variables['Build.SourceBranchName'], 'investigation/')) }}
+    isInvestigationBuild: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/investigation/') }}

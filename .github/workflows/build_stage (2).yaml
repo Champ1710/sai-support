@@ -1,0 +1,278 @@
+# https://aka.ms/yaml
+parameters:
+- name: 'artifactName'
+  default: '$(ServiceName)'
+- name: 'buildContext'
+  default: 'none'
+- name: 'dotnet'
+  default: 'false'
+- name: 'libraryType'
+  default: 'dotnetcore'
+- name: 'nuget'
+  default: 'false'
+- name: 'npm'
+  default: 'false'
+- name: 'docker'
+  default: 'false'
+- name: 'dockerFile'
+  default: '$(Build.Repository.LocalPath)/$(ServiceName)/Dockerfile'
+- name: 'dockerBuildContext'
+  default: '$(Build.Repository.LocalPath)/$(ServiceName)'
+- name: 'dockerRepoName'
+  default: 'images/$(chartname)'
+- name: 'helm'
+  default: 'false'
+- name: 'masterHelm'
+  default: 'false'
+- name: 'buildPlatform'
+  default: 'x64'
+- name: 'buildConfig'
+  default: 'Release'
+- name: 'staticCodeAnalysis'
+  default: 'true'
+- name: 'runMasterHelmChartPipeline'
+  default: 'true'
+- name: 'containerAnalysis'
+  default: 'true'
+- name: 'containerFailOnIssues'
+  default: 'false'
+- name: 'snykOrganization'
+  default: 'bdhp-dev'
+- name: dotNetVersion
+  default: '6.0.x'
+- name: 'nodeVersion'
+  default: '16.x'
+- name: 'nugetOldVersioning'
+  default: 'false'
+- name: 'subscriptionPrefix'
+  default: 'BDHP'
+- name: 'kendoUiLicense'
+  default: 'false'
+- name: 'isInvestigationBuild'
+  default: false
+
+stages:
+- stage: Build
+  displayName: Build
+  variables:
+  - template: ..\..\shared\variables\${{ lower(parameters.subscriptionPrefix) }}_build_release_stages.yaml@templates # Template reference
+  - name: 'branchConditionToTriggerTasks'
+    value: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/dev'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/future/dev'), startsWith(variables['Build.SourceBranch'], 'refs/heads/investigation/')))
+  - name: 'dotnetScannerMode'
+    ${{ if or(eq(parameters.dotnet, true), and(eq(parameters.nuget, true), eq(parameters.libraryType, 'dotnetcore'))) }}:
+      value: 'true'
+    ${{ else }}:
+      value: 'false'
+  - name: 'dockerExternalImages'
+    ${{ if eq(parameters.docker, false) }}:
+      value: 'true'
+    ${{ else }}:
+      value: 'false'
+  - name: 'dotNetSDKTag'
+    ${{ if and(eq(parameters.dotnet, true), eq(parameters.dotNetVersion, '6.0.x')) }}:
+      value: '6.0-alpine'
+    ${{ else }}:
+      value: '8.0-alpine'
+
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - ${{ if and(eq(parameters.nugetOldVersioning, false), eq(parameters.isInvestigationBuild, false)) }}:
+      - template: ..\..\shared\tasks\generate_version_for_docker_helm.yaml@templates  # Template reference
+        parameters:
+          DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+          DevOpsCommonKeyVault: ${{ variables.DevOpsCommonKeyVault }}
+          ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+          containerRegistryName: ${{ variables.containerRegistryName }}
+          docker: ${{ parameters.docker }}
+          helm: ${{ parameters.helm }}
+
+    - ${{ if eq(parameters.isInvestigationBuild, true) }}:
+      - script: |
+          echo "##vso[task.setvariable variable=dockerImageVersion]0.0.1"
+        displayName: 'Set static Docker version for investigation build'
+    
+    - ${{ if eq(parameters.isInvestigationBuild, false) }}:
+      - template: ..\..\shared\tasks\update_pipeline_details.yaml@templates  # Template reference
+
+    - ${{ if eq(parameters.kendoUiLicense, true) }}:
+      - template: ..\..\shared\tasks\create_file_with_azure_secret_value_as_content.yaml@templates  # Template reference
+        parameters:
+          azureKeyVaultServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+          azureKeyVaultName: ${{ variables.DevOpsCommonKeyVault }}
+          secretFileLocation: ${{ parameters.dockerBuildContext }}
+          secretFileBaseName: 'kendo-ui-license'
+          secretFileExtention: '.txt'
+          secretNameInAzureKeyVault: 'kendo-ui-license'
+      
+    - ${{ if eq(parameters.dotnet, true) }}:
+      - template: ..\tasks\dotnet_generate_build_props_file.yaml@templates  # Template reference
+
+      - template: ..\tasks\dotnet_install_nuget_restore.yaml@templates  # Template reference
+        parameters:
+            dotNetVersion: ${{ parameters.dotNetVersion }}
+
+      - template: ..\tasks\dotnet_compile_publish_export_artifacts_in_docker_alpine.yaml@templates  # Template reference
+        parameters:
+            dotNetSDKTag: ${{ variables.dotNetSDKTag }}
+
+    - ${{ if eq(parameters.npm, true) }}:
+      - template: ..\tasks\npm_install_build.yaml@templates  # Template reference
+        parameters:
+          nodeVersion: ${{ parameters.nodeVersion }}
+
+    - ${{ if eq(parameters.nuget, true) }}:
+      - ${{ if eq(parameters.libraryType, 'dotnetcore') }}:
+        - template: ..\tasks\dotnet_install_nuget_restore.yaml@templates  # Template reference
+          parameters:
+            dotNetVersion: ${{ parameters.dotNetVersion }}
+        
+        - template: ..\tasks\dotnet_nuget_pack_publish.yaml@templates  # Template reference
+          parameters:
+            branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+
+      - ${{ if eq(parameters.libraryType, 'linux') }}:
+        - template: ..\tasks\make_build_nuget_pack_publish.yaml@templates  # Template reference
+          parameters:
+            branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+
+    - ${{ if eq(parameters.buildContext, 'mirth_plugin') }}:
+      - template: ..\tasks\mirth_plugin.yaml@templates  # Template reference
+        parameters:
+          buildContext: ${{ parameters.buildContext }}
+          artifactName: ${{ parameters.artifactName }}
+
+    - ${{ if eq(parameters.staticCodeAnalysis, true) }}:
+      - template: ..\tasks\sonarcloud_code_analysis_code_coverage.yaml@templates  # Template reference
+        parameters:
+          dotnetScannerMode: ${{ variables.dotnetScannerMode }}
+          DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+          SonarCloudServiceConnection:  ${{ variables.SonarCloudServiceConnection }}
+          DevOpsCommonKeyVault: ${{ variables.DevOpsCommonKeyVault }}
+
+    - ${{ if eq(parameters.docker, true) }}:
+      - ${{ if eq(parameters.dotnet, 'true') }}:
+        - template: ..\tasks\docker_build_push_to_acr.yaml@templates  # Template reference
+          parameters:
+            ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+            branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+            dockerRegistryServiceConnection: ${{ variables.dockerRegistryServiceConnection }}
+            SnykServiceConnection: ${{ variables.SnykServiceConnection}}
+            dockerFile: ${{ parameters.dockerFile }}
+            dockerBuildContext: '$(Build.ArtifactStagingDirectory)/out'
+            dockerImageVersion: '$(dockerImageVersion)'
+            dockerACRRepositoryName: '$(dockerACRRepositoryName)'
+            dockerBuildArgs: '$(dockerBuildArgs)'
+            containerAnalysis: ${{ parameters.containerAnalysis }}
+            containerFailOnIssues: ${{ parameters.containerFailOnIssues }}
+            snykOrganization: ${{ parameters.snykOrganization }}
+      - ${{ else }}:
+        - ${{ if eq(variables['Build.DefinitionName'], 'bdhp-keycloak-build') }}:
+          - template: ..\tasks\docker_build_push_to_acr.yaml@templates  # Template reference
+            parameters:
+              ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+              branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+              dockerRegistryServiceConnection: ${{ variables.dockerRegistryServiceConnection }}
+              SnykServiceConnection: ${{ variables.SnykServiceConnection}}
+              dockerFile: ${{ parameters.dockerFile }}
+              dockerBuildContext: ${{ parameters.dockerBuildContext }}
+              dockerImageVersion: '$(dockerImageVersion)'
+              dockerACRRepositoryName: 'images/bdhp-keycloak-postgresql'
+              dockerBuildArgs: 'database=postgres'
+              containerAnalysis: ${{ parameters.containerAnalysis }}
+              containerFailOnIssues: ${{ parameters.containerFailOnIssues }}
+              snykOrganization: ${{ parameters.snykOrganization }}
+          - template: ..\tasks\docker_build_push_to_acr.yaml@templates  # Template reference
+            parameters:
+              ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+              branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+              dockerRegistryServiceConnection: ${{ variables.dockerRegistryServiceConnection }}
+              SnykServiceConnection: ${{ variables.SnykServiceConnection}}
+              dockerFile: ${{ parameters.dockerFile }}
+              dockerBuildContext: ${{ parameters.dockerBuildContext }}
+              dockerImageVersion: '$(dockerImageVersion)'
+              dockerACRRepositoryName: 'images/bdhp-keycloak-mysql'
+              dockerBuildArgs: 'database=mysql'
+              containerAnalysis: ${{ parameters.containerAnalysis }}
+              containerFailOnIssues: ${{ parameters.containerFailOnIssues }}
+              snykOrganization: ${{ parameters.snykOrganization }}
+        - ${{ elseif eq(variables['Build.DefinitionName'], 'bdhp-mirth-build') }}:
+          - template: ..\tasks\docker_build_push_to_acr.yaml@templates  # Template reference
+            parameters:
+              ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+              branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+              dockerRegistryServiceConnection: ${{ variables.dockerRegistryServiceConnection }}
+              SnykServiceConnection: ${{ variables.SnykServiceConnection}}
+              dockerFile: '$(Build.Repository.LocalPath)/bdhp-mirth-sidecar/Dockerfile'
+              dockerBuildContext: '$(Build.Repository.LocalPath)/bdhp-mirth-sidecar'
+              dockerImageVersion: '$(dockerImageVersion)'
+              dockerACRRepositoryName: 'images/bdhp-mirth-sidecar'
+              containerAnalysis: ${{ parameters.containerAnalysis }}
+              containerFailOnIssues: ${{ parameters.containerFailOnIssues }}
+              snykOrganization: ${{ parameters.snykOrganization }}
+        - ${{ else }}:
+          - template: ..\tasks\docker_build_push_to_acr.yaml@templates  # Template reference
+            parameters:
+              ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+              branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+              dockerRegistryServiceConnection: ${{ variables.dockerRegistryServiceConnection }}
+              SnykServiceConnection: ${{ variables.SnykServiceConnection}}
+              dockerFile: ${{ parameters.dockerFile }}
+              dockerBuildContext: ${{ parameters.dockerBuildContext }}
+              dockerImageVersion: '$(dockerImageVersion)'
+              dockerACRRepositoryName: '$(dockerACRRepositoryName)'
+              dockerBuildArgs: '$(dockerBuildArgs)'
+              containerAnalysis: ${{ parameters.containerAnalysis }}
+              containerFailOnIssues: ${{ parameters.containerFailOnIssues }}
+              snykOrganization: ${{ parameters.snykOrganization }}
+
+    - ${{ if and(eq(parameters.helm, true), eq(parameters.isInvestigationBuild, false)) }}:
+      - task: HelmInstaller@1
+        displayName: 'Install Helm 3.12.3'
+        inputs:
+          helmVersionToInstall: 3.12.3
+
+      - template: ..\..\shared\tasks\helm_acr_registry_login.yaml@templates  # template reference
+        parameters:
+          ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+          containerRegistryName: ${{ variables.containerRegistryName }}
+          containerRegistryUserName: 'helm-token-$(System.DefinitionId)'
+
+      - template: ..\..\shared\tasks\helm_pacakge_push_to_acr.yaml@templates  # Template reference
+        parameters:
+          ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+          branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+          helmACRRepositoryName: '$(helmACRRepositoryName)'
+          helmChartVersion: '$(helmChartVersion)'
+
+      - template: ..\..\shared\tasks\helm_acr_registry_token_delete.yaml@templates  # template reference
+        parameters:
+          ACRServiceConnection: ${{ variables.ACRServiceConnection }}
+          containerRegistryName: ${{ variables.containerRegistryName }}
+          containerRegistryUserName: 'helm-token-$(System.DefinitionId)'
+
+    - ${{ if and(eq(parameters.nugetOldVersioning, false), eq(parameters.isInvestigationBuild, false)) }}:
+      - template: ..\..\shared\tasks\github_add_tag_to_repository.yaml@templates  # Template reference
+        parameters:
+          DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+          branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+          githubRepositoryName: '$(Build.Repository.Name)'
+          githubCommitID: '$(Build.SourceVersion)'
+          githubTagVersion: '$(githubTagVersion)'
+          DevOpsCommonKeyVault: ${{ variables.DevOpsCommonKeyVault }}
+
+    - ${{ if and(eq(parameters.runMasterHelmChartPipeline, true), eq(parameters.isInvestigationBuild, false)) }}:
+      - template: ..\..\shared\tasks\trigger_bdhp_master_chart_pipeline.yaml@templates  # Template reference
+        parameters:
+          DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+          branchConditionToTriggerTasks: ${{ variables.branchConditionToTriggerTasks }}
+          DevOpsCommonKeyVault: ${{ variables.DevOpsCommonKeyVault }}
+
+    - template: ..\..\shared\tasks\save_pipeline_variables.yaml@templates  # Template reference
+
+    - template: ..\..\shared\tasks\publish_pipeline_artifacts.yaml@templates # Template reference
+      parameters:
+        artifactName: ${{ parameters.artifactName }}

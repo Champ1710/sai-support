@@ -1,0 +1,334 @@
+# https://aka.ms/yaml
+# File: azure-pipelines-release.yml
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+# Disable triggering from code updates to repo
+trigger: none
+
+# Set up to trigger release on completion of build pipeline
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: 'Hillrom-Enterprise/bdhp-platform'
+      ref: 'refs/heads/dev'
+      endpoint: 'Hillrom-Enterprise-IAC - BDHP GA - POC-BDHP'
+    
+    - repository: bdhp-infrastructure-terraform-config
+      type: github
+      name: 'Hillrom-Enterprise/bdhp-infrastructure-terraform-config'
+      ref: 'refs/heads/dev'
+      endpoint: 'Hillrom-Enterprise-IAC - BDHP GA - POC-BDHP'
+
+pool:
+  vmImage: ubuntu-latest
+
+extends:
+  template: workflow-templates/ci-cd/release/stages/aks_release_stages.yaml@templates  # Template reference
+  parameters:
+    deploymentType: 'terraform'
+    terraformStack: 'platform-monitoring'
+    includeAllStages: 'true'
+================================================================================================
+parameters:
+- name: artifactRentionDays
+  default: $(artifactRentionDays)
+- name: 'DevOpsCommonKVServiceConnection'
+  default: 'BDHP Automation Deployment Account - Prod-$(System.TeamProject)'
+- name: 'AzureDevOpsOrganization'
+  default: 'hrc-zenith'
+- name: 'AzureDevOpsProjectName'
+  default: '$(System.TeamProject)'
+- name: 'BuildID'
+  default: '$(Build.BuildID)'
+- name: 'BuildDefinitionId'
+  default: '$(System.DefinitionId)'
+
+steps:
+- template: azure_devops_generate_access_token.yaml@templates  # Template reference
+  parameters:
+    azureDevOpsAccessTokenVariableName: 'AzureDevOpsPAT'
+
+- task: PowerShell@2
+  condition: and(succeeded(), not(canceled()))
+  name: RetainOnSuccess
+  displayName: Retain on Success
+  inputs:
+    failOnStderr: true
+    targetType: 'inline'
+    script: |
+      $AzureDevOpsOrganization = "${{ parameters.AzureDevOpsOrganization }}";
+      $AzureDevOpsProject = "${{ parameters.AzureDevOpsProjectName }}";
+      $OwnerId = "User:$(Build.RequestedForId)";
+      $BuildId = "${{ parameters.BuildID }}";
+      $BuildDefinitionId = "${{ parameters.BuildDefinitionId }}";
+      $AzureDevOpsPAT = "$(AzureDevOpsPAT)";
+      $Headers = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($AzureDevOpsPAT)"))};
+
+      $contentType = "application/json";
+      
+      $uri = "https://dev.azure.com/$($AzureDevOpsOrganization)/$($AzureDevOpsProject)/_apis/build/retention/leases?ownerId=$($OwnerId)&definitionId=$($BuildDefinitionId)&runId=$($BuildId)&api-version=7.2-preview.2";
+      $results = Invoke-RestMethod -uri $uri -method GET -Headers $Headers -ContentType $contentType;
+      $leaseId = $results.value.leaseId;
+      
+      echo $leaseId;
+      
+      if ($results.value -ne $null)
+      {
+          $patchUri = "https://dev.azure.com/$($AzureDevOpsOrganization)/$($AzureDevOpsProject)/_apis/build/retention/leases/$($leaseId)?api-version=7.2-preview.2";
+          $rawPatchRequest = @{ daysValid = "${{parameters.artifactRentionDays}}"; protectPipeline = $false; };
+          $patchRequest = ConvertTo-Json $rawPatchRequest;
+          Invoke-RestMethod -uri $patchUri -method PATCH -Headers $Headers -ContentType $contentType -Body $patchRequest;
+          echo "patch";
+      }
+      else
+      {
+          $rawSetRequest = @{ daysValid = "${{parameters.artifactRentionDays}}"; definitionId = $($BuildDefinitionId); ownerId = $OwnerId; protectPipeline = $false; runId = $($BuildId) };
+          $setRequest = ConvertTo-Json @($rawSetRequest);
+          $setUri = "https://dev.azure.com/$($AzureDevOpsOrganization)/$($AzureDevOpsProject)/_apis/build/retention/leases?api-version=6.0-preview.1";
+          Invoke-RestMethod -uri $setUri -method POST -Headers $Headers -ContentType $contentType -Body $setRequest;
+      }
+========================================================================================================================================
+# https://aka.ms/yaml
+parameters:
+- name: artifactName
+  type: string
+  default: $(ServiceName)
+- name: 'guestApplicationTeam'
+  type: string
+  default: ''
+- name: 'customerName'
+  type: string
+  default: ''
+- name: 'deployStageName'
+  type: string
+  default: 'DEV_EUS'
+- name: 'deployStageDependsOn'
+  type: string
+  default: 'DEV_EUS'
+- name: 'deployStageEnvironment'
+  type: string
+  default: 'dev'
+- name: 'deployStagePostDeploymentApprovers'
+  type: string
+  default: ''
+- name: 'terraformConfigRepoName'
+  type: string
+  default: 'bdhp-infrastructure-terraform-config'
+- name: 'terraformStack'
+  type: string
+- name: 'backendTFVarsFileName'
+  type: string
+  default: "tf_backend.tfvars"
+- name: 'environmentTFVarsFileName'
+  type: string
+  default: "tf_environment.tfvars"
+- name: 'customerTFVarsFileName'
+  type: string
+  default: "tf_customer.tfvars"
+- name: 'terraformCustomerBackendStateFileName'
+  type: string
+  default: ''
+- name: 'subscriptionPrefix'
+  type: string
+  default: 'BDHP'
+
+stages:
+- stage: ${{ parameters.deployStageName }}
+  displayName: "${{ parameters.deployStageName }}-Deployment"
+  dependsOn: ${{ parameters.deployStageDependsOn }}
+  variables:
+  - template: ..\..\shared\variables\${{ lower(parameters.subscriptionPrefix) }}_build_release_stages.yaml@templates  # Template reference
+  - template: ..\variables\release_${{ lower(parameters.subscriptionPrefix) }}_${{ lower(parameters.deployStageName) }}.yaml@templates  # Template reference
+  - name: 'terraformDirectory'
+    value: 'bdhp-infrastructure-terraform-${{ parameters.terraformStack }}'
+  - name: 'terraformWorkingDirectory'
+    value: '$(System.DefaultWorkingDirectory)/$(terraformDirectory)'
+  - name: 'terraformArtifactStagingdirectory'
+    value: '$(build.artifactstagingdirectory)/${{ parameters.artifactName }}'
+  - name: 'terraformPlanOutFile'
+    value: 'tfplan.out'
+  - name: terraformApply
+    ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/dev'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix/')) }}:
+      value: 'true'
+    ${{ else }}:
+      value: 'false'
+  
+  #### jOB - Terraform Install, Initialize and Validate
+  jobs:
+  - job: tf_init_validate_and_plan
+    displayName: Terraform Init, Validate and Plan
+    continueOnError: false
+    pool:
+      vmimage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - checkout: ${{ parameters.terraformConfigRepoName }}
+      persistCredentials: true
+
+    - ${{ if eq(parameters.terraformStack, 'single-tenant-deployments') }}:
+      - checkout: ${{ variables.terraformDirectory }}
+        persistCredentials: true
+
+    - template: ..\tasks\terraform_validate_set_variables.yaml
+      parameters:
+        deploymentEnvironment: ${{ variables.deploymentEnvironment }}
+        deploymentAzureRegionShort: ${{ variables.deploymentAzureRegionShort }}
+        terraformWorkingDirectory: $(terraformWorkingDirectory)
+        terraformConfigRepoName : ${{ parameters.terraformConfigRepoName }}
+        terraformStack : ${{ parameters.terraformStack }}
+        backendTFVarsFileName: ${{ parameters.backendTFVarsFileName }}
+        environmentTFVarsFileName: ${{ parameters.environmentTFVarsFileName }}
+        customerTFVarsFileName: ${{ parameters.customerTFVarsFileName }}
+        terraformCustomerBackendStateFileName: ${{ parameters.terraformCustomerBackendStateFileName }}
+
+    - template: ..\tasks\terraform_init.yaml
+      parameters:
+        DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+        terraformWorkingDirectory: '$(terraformWorkingDirectory)'
+        terraform_backend_resource_group_name: '$(terraform_backend_resource_group_name)'
+        terraform_backend_storage_account_name: '$(terraform_backend_storage_account_name)'
+        terraform_backend_container_name: '$(terraform_backend_container_name)'
+        terraform_backend_key: '$(terraform_backend_key)'
+
+    - template: ..\tasks\terraform_plan.yaml
+      parameters:
+        DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+        terraformWorkingDirectory: '$(terraformWorkingDirectory)'
+        terraformPlanOutFile: '$(terraformPlanOutFile)'
+        terraformCommandOptionForVarFiles: '$(terraformCommandOptionForVarFiles)'
+        terraformPlanArtifactName: 'tf_plan_${{ parameters.artifactName }}'
+
+    - powershell: |
+        $terraformWorkingDirectory = "$(terraformWorkingDirectory)"
+        $terraformArtifactStagingdirectory = "$(terraformArtifactStagingdirectory)"
+
+        if(!(Test-Path -Path "$terraformArtifactStagingdirectory"))
+        {
+          New-Item -Path $terraformArtifactStagingdirectory -ItemType Directory
+        }
+
+        Copy-Item -Path "$($terraformWorkingDirectory)/tfplan.out" -Destination "$($terraformArtifactStagingdirectory)/tfplan.out" -Force
+        Copy-Item -Path "$($terraformWorkingDirectory)/.terraform.lock.hcl" -Destination "$($terraformArtifactStagingdirectory)/.terraform.lock.hcl" -Force
+        Copy-Item -Path "$($terraformWorkingDirectory)/.terraform" -Destination "$($terraformArtifactStagingdirectory)/.terraform" -Force -Recurse
+      displayName: 'Copy Terraform artifacts to artifact directory - PowerShell Script'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive $(terraformArtifactStagingdirectory)'
+      inputs:
+        rootFolderOrFile: '$(terraformArtifactStagingdirectory)'
+        includeRootFolder: false
+        archiveFile: '$(build.artifactstagingdirectory)/$(Build.BuildId)/$(Build.BuildId)_${{ parameters.artifactName }}.zip'
+    
+    - task: PublishPipelineArtifact@1
+      displayName: Publish artifacts
+      inputs:
+        targetPath: '$(build.artifactstagingdirectory)/$(Build.BuildId)'
+        publishLocation: 'pipeline'
+        artifact: '${{ parameters.artifactName }}'
+  
+  - ${{ if and(ne(variables['Build.Reason'], 'Schedule'), eq(variables['terraformApply'], 'true')) }}:
+    #### Job - Manual stop for Validation of the Terraform Plan Activiy
+    - job: manual_approval
+      displayName: 'Manual Approval'
+      dependsOn: tf_init_validate_and_plan
+      pool: server
+      timeoutInMinutes: 4320 # job times out in 3 days
+      steps:
+      - task: ManualValidation@0
+        timeoutInMinutes: 1440 # task times out in 1 day
+        inputs:
+          notifyUsers: |
+            ${{ parameters.deployStagePostDeploymentApprovers }}
+          instructions: 'Review the plan tf_plan_${{ parameters.artifactName }} in Terraform plan from build results page and approve it within 1 day'
+          onTimeout: 'reject'
+
+    #### Stage - Terraform Apply/Destroy
+    - deployment: tf_apply
+      displayName: 'Terraform Apply'
+      condition: "and(succeeded(), eq(variables['terraformApply'], 'true') )"
+      dependsOn: manual_approval
+      environment: ${{ parameters.deployStageEnvironment }}
+      pool:
+        vmimage: 'ubuntu-latest'
+      variables:
+      - name: 'terraformArtifactExtractDirectory'
+        value: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)_${{ parameters.artifactName }}'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: current  # refers to artifacts published by current pipeline
+              artifact: ${{ parameters.artifactName }}
+              name: string
+              displayName: 'download tf plan artifact'
+          
+            - checkout: self
+              persistCredentials: true
+
+            - checkout: ${{ parameters.terraformConfigRepoName }}
+              persistCredentials: true
+
+            - ${{ if eq(parameters.terraformStack, 'single-tenant-deployments') }}:
+              - checkout: ${{ variables.terraformDirectory }}
+                persistCredentials: true
+
+            - task: ExtractFiles@1
+              displayName: 'Extract files'
+              inputs:
+                archiveFilePatterns: '$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(Build.BuildId)_${{ parameters.artifactName }}.zip'
+                destinationFolder: '$(terraformArtifactExtractDirectory)'
+            
+            - powershell: |
+                $terraformWorkingDirectory = "$(terraformWorkingDirectory)"
+                $terraformArtifactExtractDirectory = "$(terraformArtifactExtractDirectory)"
+
+                Copy-Item -Path "$($terraformArtifactExtractDirectory)/tfplan.out" -Destination "$($terraformWorkingDirectory)/tfplan.out" -Force
+                Copy-Item -Path "$($terraformArtifactExtractDirectory)/.terraform.lock.hcl" -Destination "$($terraformWorkingDirectory)/.terraform.lock.hcl" -Force
+                Copy-Item -Path "$($terraformArtifactExtractDirectory)/.terraform" -Destination "$($terraformWorkingDirectory)/.terraform" -Force -Recurse
+              displayName: 'Copy Terraform artifacts to working directory - PowerShell Script'
+
+            - task: CmdLine@2
+              displayName: .Terraform access
+              inputs:
+                targetType: 'inline'
+                script: |
+                  cd "$(terraformWorkingDirectory)"
+                  chmod -R u+x .terraform
+                  echo "Running terraform show tfplan.out in $(terraformWorkingDirectory)"
+                  ls -la
+
+            - template: ..\tasks\terraform_validate_set_variables.yaml
+              parameters:
+                deploymentEnvironment: ${{ variables.deploymentEnvironment }}
+                deploymentAzureRegionShort: ${{ variables.deploymentAzureRegionShort }}
+                terraformWorkingDirectory: $(terraformWorkingDirectory)
+                terraformConfigRepoName : ${{ parameters.terraformConfigRepoName }}
+                terraformStack : ${{ parameters.terraformStack }}
+                backendTFVarsFileName: ${{ parameters.backendTFVarsFileName }}
+                environmentTFVarsFileName: ${{ parameters.environmentTFVarsFileName }}
+                customerTFVarsFileName: ${{ parameters.customerTFVarsFileName }}
+                terraformCustomerBackendStateFileName: ${{ parameters.terraformCustomerBackendStateFileName }}
+
+            - template: ..\tasks\terraform_init.yaml
+              parameters:
+                DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+                terraformWorkingDirectory: '$(terraformWorkingDirectory)'
+                terraform_backend_resource_group_name: '$(terraform_backend_resource_group_name)'
+                terraform_backend_storage_account_name: '$(terraform_backend_storage_account_name)'
+                terraform_backend_container_name: '$(terraform_backend_container_name)'
+                terraform_backend_key: '$(terraform_backend_key)'
+
+            - template: ..\tasks\terraform_apply.yaml
+              parameters:
+                DevOpsCommonKVServiceConnection: ${{ variables.DevOpsCommonKVServiceConnection }}
+                terraformWorkingDirectory: '$(terraformWorkingDirectory)'
+                terraformPlanOutFile: '$(terraformPlanOutFile)'
+                terraformCommandOptionForVarFiles: '$(terraformCommandOptionForVarFiles)'
+
+            - template: ..\..\shared\tasks\add_retention_to_artifacts.yaml@templates  # Template reference
+              parameters:
+                artifactRentionDays: ${{ variables.artifactRentionDays }}
