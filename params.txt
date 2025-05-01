@@ -1,0 +1,4 @@
+organization=bdhp-v4.6.0
+tags=version=4.23.0
+image=bdhpcr.azurecr.io/images/bdhp-account:4.23.0
+dockerfilePath=\repos\github-hillrom\bdhp\bdhp-account\AccountService\Dockerfile
