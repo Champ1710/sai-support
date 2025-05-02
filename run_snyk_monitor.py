@@ -1,29 +1,39 @@
 import subprocess
+from datetime import datetime
 
-# Path to your repos.txt file
+# Paths
 repos_file = "repos.txt"
+log_file = "snyk_scan.log"
 
-# Read and parse the parameters
-repos = {}
+# Static parameters
+organization = "your-org-name"
+tags = "env:prod"
+dockerfile_path = "./Dockerfile"  # Optional or "" if not used
+
+# Read image list
 with open(repos_file, "r") as f:
-    for line in f:
-        if "=" in line:
-            key, value = line.strip().split("=", 1)
-            repos[key.strip()] = value.strip()
+    images = [line.strip() for line in f if line.strip()]
 
-# Define the PowerShell command as a string
-ps_command = f"""
-Snyk-Container-Monitor `
-    -organization "{repos['organization']}" `
-    -tags "{repos['tags']}" `
-    -image "{repos['image']}" `
-    -dockerfilePath "{repos['dockerfilePath']}"
-"""
+# Start logging
+with open(log_file, "w") as log:
+    log.write(f"--- Snyk Scan Started at {datetime.now()} ---\n\n")
+    
+    for image in images:
+        log.write(f"\n--- Scanning: {image} ---\n")
 
-# Run the command using PowerShell Core (pwsh)
-try:
-    result = subprocess.run(["pwsh", "-Command", ps_command], capture_output=True, text=True)
-    print("STDOUT:\n", result.stdout)
-    print("STDERR:\n", result.stderr)
-except Exception as e:
-    print(f"Failed to run PowerShell command: {e}")
+        ps_command = f"""
+        & './Snyk-Container-Monitor.ps1' `
+            -organization "{organization}" `
+            -tags "{tags}" `
+            -image "{image}" `
+            -dockerfilePath "{dockerfile_path}"
+        """
+
+        try:
+            result = subprocess.run(["pwsh", "-Command", ps_command], capture_output=True, text=True)
+            log.write("STDOUT:\n" + result.stdout + "\n")
+            log.write("STDERR:\n" + result.stderr + "\n")
+        except Exception as e:
+            log.write(f"ERROR running scan for {image}: {e}\n")
+
+    log.write(f"\n--- Snyk Scan Completed at {datetime.now()} ---\n")
