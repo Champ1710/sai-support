@@ -8,16 +8,20 @@ csv_path = "DeviceBridge_Scan_Tracking(BDHP Scan Tracking) (1).csv"
 # Output log file
 log_file = "snyk_batch_scan_output.log"
 
-# Open the CSV file and read it
+# Print headers to help identify correct column name
 with open(csv_path, newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
-    
-    with open(log_file, "w") as log:
-        for index, row in enumerate(reader, start=1):
-            ps_command = row.get("Unnamed: 28")  # Adjust column name as needed
+    print(f"CSV Headers: {reader.fieldnames}")
 
-            # Skip invalid or empty commands
-            if not isinstance(ps_command, str) or not ps_command.startswith("New-Snyk-Container-Sbom"):
+    with open(log_file, "w") as log:
+        log.write(f"--- Snyk Batch Scan Started at {datetime.now()} ---\n\n")
+
+        for index, row in enumerate(reader, start=1):
+            # Replace this with the actual header name (adjust after checking output above)
+            ps_command = row.get("Unnamed: 28", "").strip()
+
+            if not ps_command or not ps_command.startswith("New-Snyk-Container-Sbom"):
+                print(f"No valid command for Row {index}, skipping.")
                 continue
 
             log.write(f"\n--- Snyk Scan: Row {index} | {datetime.now()} ---\n")
@@ -25,11 +29,11 @@ with open(csv_path, newline='', encoding='utf-8') as csvfile:
 
             try:
                 result = subprocess.run(["pwsh", "-Command", ps_command], capture_output=True, text=True)
-                log.write("\n--- STDOUT ---\n")
-                log.write(result.stdout)
-                log.write("\n--- STDERR ---\n")
-                log.write(result.stderr)
+                log.write("\n--- STDOUT ---\n" + result.stdout)
+                log.write("\n--- STDERR ---\n" + result.stderr)
             except Exception as e:
                 log.write(f"\n--- ERROR ---\n{str(e)}\n")
 
-print("✅ All Snyk scans have been executed. Check 'snyk_batch_scan_output.log' for results.")
+        log.write(f"\n--- Snyk Batch Scan Completed at {datetime.now()} ---\n")
+
+print("✅ All Snyk scans succeded. Check 'snyk_batch_scan_output.log' for results.")

@@ -1,4 +1,4 @@
---- Snyk Scan Started at 2025-05-02 19:57:14.362596 ---
+--- Snyk Scan Started at 2025-05-02 20:27:26.457594 ---
 
 
 --- Scanning: bdhpcr.azurecr.io/images/bdhp-adt:5.9.0 ---
@@ -391,4 +391,4 @@ Dockerfile Path: ./Dockerfile
 STDERR:
 
 
---- Snyk Scan Completed at 2025-05-02 19:57:28.240947 ---
+--- Snyk Scan Completed at 2025-05-02 20:27:40.317421 ---
