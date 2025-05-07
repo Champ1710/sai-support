@@ -53,7 +53,7 @@ def list_all_repos(owner, github_pat):
 
 # Example call
 github_owner = "champ1710"
-github_pat = "your_github_pat_here"  # Use a secure method to store the token
+github_pat = "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e"  # Use a secure method to store the token
 
 repos = list_all_repos(github_owner, github_pat)
 print(repos)
