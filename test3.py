@@ -1,85 +1,59 @@
+import os
 import requests
 from requests.auth import HTTPBasicAuth
-import subprocess
-import os
+import time
 
-def list_github_repo_root(owner, github_pat):
-    # Fetch all repositories for the given owner, with pagination handling
-    url = f"https://api.github.com/users/{owner}/repos"
+def get_rate_limit(github_pat):
+    url = "https://api.github.com/rate_limit"
     headers = {
+        "Authorization": f"token {github_pat}",
         "Accept": "application/vnd.github.v3+json"
     }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        rate_limit = response.json()
+        remaining = rate_limit['resources']['core']['remaining']
+        reset_time = rate_limit['resources']['core']['reset']
+        return remaining, reset_time
+    else:
+        print(f"Failed to get rate limit info: {response.status_code}")
+        return None, None
 
-    all_repos = []
+def wait_for_rate_limit_reset(reset_time):
+    # Wait until the reset time (convert Unix timestamp to seconds)
+    wait_seconds = reset_time - int(time.time()) + 10  # adding a buffer of 10 seconds
+    print(f"Rate limit exceeded. Waiting for {wait_seconds} seconds.")
+    time.sleep(wait_seconds)
+
+def list_all_repos(owner, github_pat):
+    repos = []
+    url = f"https://api.github.com/users/{owner}/repos"
+    headers = {"Authorization": f"token {github_pat}", "Accept": "application/vnd.github.v3+json"}
 
     while url:
-        response = requests.get(url, auth=HTTPBasicAuth('', github_pat), headers=headers)
-
+        response = requests.get(url, headers=headers)
+        
+        # Check if rate limit is exceeded
+        if response.status_code == 403:
+            remaining, reset_time = get_rate_limit(github_pat)
+            if remaining == 0:
+                wait_for_rate_limit_reset(reset_time)
+                continue  # Retry the request after waiting
+            
         if response.status_code == 200:
-            all_repos.extend(response.json())
-            # Check for pagination
+            repos += response.json()
             if 'link' in response.headers and 'rel="next"' in response.headers['link']:
                 url = response.headers['link'].split(';')[0][1:-1]
             else:
                 url = None
         else:
-            print(f"Error {response.status_code}: {response.text}")
+            print(f"❌ Failed to list repos: {response.status_code} - {response.text}")
             break
+    return [repo["name"] for repo in repos]
 
-    # Iterate through all repositories and list their contents
-    for repo in all_repos:
-        repo_name = repo['name']
-        print(f"\nListing files for repo: {repo_name}")
-        list_repo_contents(owner, repo_name, github_pat)
-
-def list_repo_contents(owner, repo, github_pat):
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/"
-    headers = {
-        "Accept": "application/vnd.github.v3+json"
-    }
-
-    response = requests.get(url, auth=HTTPBasicAuth('', github_pat), headers=headers)
-
-    if response.status_code == 200:
-        found_dockerfile = False
-        for item in response.json():
-            print(f"- {item['name']} ({item['type']})")
-            if item['name'].lower() == 'dockerfile':
-                found_dockerfile = True
-                print(f"Found Dockerfile in repo: {repo}")
-                # Fetch Docker image (assuming Dockerfile exists)
-                fetch_docker_image(owner, repo)
-        if not found_dockerfile:
-            print(f"No Dockerfile found in repo: {repo}")
-    else:
-        print(f"Error {response.status_code}: {response.text}")
-
-def fetch_docker_image(owner, repo):
-    """Fetch Docker image by building it from the Dockerfile in the repo."""
-    try:
-        # Clone the repository temporarily
-        subprocess.run(["git", "clone", f"https://github.com/{owner}/{repo}.git"], check=True)
-
-        # Change directory into the cloned repo
-        os.chdir(repo)
-
-        # Build the Docker image using the Dockerfile
-        image_tag = f"{repo}:latest"
-        subprocess.run(["docker", "build", "-t", image_tag, "."], check=True)
-
-        # Optionally, you can push the image to a registry
-        # subprocess.run(["docker", "push", image_tag], check=True)
-
-        print(f"Docker image '{image_tag}' built successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error building Docker image for repo {repo}: {e}")
-    finally:
-        # Clean up by removing the cloned repository
-        os.chdir("..")
-        subprocess.run(["rm", "-rf", repo], check=True)
-
-# Replace with your real values
+# Example call
 github_owner = "champ1710"
-github_pat = "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e"
+github_pat = "your_github_pat_here"  # Use a secure method to store the token
 
-list_github_repo_root(github_owner, github_pat)
+repos = list_all_repos(github_owner, github_pat)
+print(repos)
