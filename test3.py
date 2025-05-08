@@ -3,7 +3,7 @@ import re
 
 # === CONFIGURATION ===
 GITHUB_OWNER = "champ1710"  # Replace with your GitHub username
-GITHUB_PAT = "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e"  # Replace with your actual token
+GITHUB_PAT = "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"  # Replace with your actual token
 
 # === HEADERS ===
 HEADERS = {
