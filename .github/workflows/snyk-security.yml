@@ -1,0 +1,35 @@
+ 
+name: Snyk Security Scan Test
+ 
+on:
+  workflow_dispatch:  # Allows manual triggering
+ 
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+ 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+ 
+      - name: Install dependencies
+        run: npm install
+ 
+      - name: Run Snyk Scan
+        run: npx snyk test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+ 
+      - name: Cleanup
+        run: |
+          echo "Cleaning up Snyk cache and Docker artifacts..."
+          rm -rf ~/.snyk
+          rm -rf .snyk-cache
+          docker system prune -af --volumes
+ 
+ 
