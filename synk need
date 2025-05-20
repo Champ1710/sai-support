@@ -1,0 +1,58 @@
+import requests
+import subprocess
+from bs4 import BeautifulSoup
+ 
+def fetch_images_from_plaintext_url(url,cert_path):
+    response = requests.get(url,verify=cert_path)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'html.parser')
+   
+    # Get all text content, split by line
+    lines = soup.get_text().splitlines()
+ 
+    # Clean lines to get valid image names
+    images = [line.strip() for line in lines if line.strip()]
+    return images
+ 
+def scan_images_with_snyk(image_list):
+    for image in image_list:
+        print(f"\nScanning image: {image}")
+        try:
+            # result = subprocess.run(
+            #     ['snyk', 'container', 'test', image],
+            #     check=True,
+            #     text=True,
+            #     capture_output=True
+            # )
+            print(" ")
+        except subprocess.CalledProcessError as e:
+            print(f"Error scanning image {image}:")
+            print(e.stderr)
+ 
+if __name__ == "__main__":
+    url = "https://lva-build.stg.baxter.com/offline/4.5.2-7.141.51-images.txt"  # Replace with your URL
+    cert_path = "certs.crt"   # Replace with your cert file
+    images = fetch_images_from_plaintext_url(url,cert_path)
+    scan_images_with_snyk(images)
+ 
+ 
+#Replace this with your actual token
+snyk_token = "d0127510-b70c-4ac3-8e8c-5bf4add0420e"
+ 
+# Snyk API base URL
+url = "https://api.snyk.io/v1/user/me"
+ 
+headers = {
+    "Authorization": f"token {snyk_token}",
+    "Content-Type": "application/json"
+}
+ 
+response = requests.get(url, headers=headers)
+ 
+if response.status_code == 200:
+    print("Authenticated successfully!")
+    print("User info:", response.json())
+else:
+    print("Authentication failed.")
+    print("Status code:", response.status_code)
+    print("Response:", response.text)
