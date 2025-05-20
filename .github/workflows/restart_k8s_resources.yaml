@@ -1,0 +1,81 @@
+parameters:
+- name: restartType
+  type: string
+- name: podName
+  type: string
+- name: StatefulSetName
+  type: string
+- name: deploymentName
+  type: string
+- name: aksNamespace
+  type: string
+- name: deploymentStageName
+  type: string
+
+stages:
+- stage: RestartKubernetesResource
+  displayName: Restart ${{ parameters.restartType }}
+  jobs:
+  - job: RestartJob
+    displayName: Restart Resource in AKS
+    steps:
+
+    - task: Kubernetes@1
+      displayName: Set AKS Context
+      inputs:
+        connectionType: Azure Resource Manager
+        azureSubscriptionEndpoint: '${{ parameters.subscriptionPrefix }}-${{ parameters.deploymentStageName }}-subscription'
+        azureResourceGroup: 'rg-${{ parameters.deploymentStageName }}-aks'
+        kubernetesCluster: 'aks-${{ parameters.deploymentStageName }}'
+        useClusterAdmin: true
+        command: get
+        arguments: nodes
+
+    # POD restart
+    - ${{ if eq(parameters.restartType, 'pod') }}:
+      - script: |
+          echo "Deleting pod: ${{ parameters.podName }} in namespace: ${{ parameters.aksNamespace }}"
+          kubectl delete pod ${{ parameters.podName }} -n ${{ parameters.aksNamespace }}
+        displayName: Restart Pod
+
+      - script: |
+          echo "Fetching logs for pod: ${{ parameters.podName }}"
+          kubectl logs ${{ parameters.podName }} -n ${{ parameters.aksNamespace }} || echo "Logs not found"
+        displayName: Get Pod Logs
+
+    # StatefulSet restart
+    - ${{ if eq(parameters.restartType, 'StatefulSet') }}:
+      - script: |
+          echo "Rolling restart of StatefulSet: ${{ parameters.StatefulSetName }}"
+          kubectl rollout restart statefulset/${{ parameters.StatefulSetName }} -n ${{ parameters.aksNamespace }}
+        displayName: Restart StatefulSet
+
+      - script: |
+          echo "Fetching logs for StatefulSet: ${{ parameters.StatefulSetName }}"
+          kubectl logs statefulset/${{ parameters.StatefulSetName }} -n ${{ parameters.aksNamespace }} || echo "Logs not found"
+        displayName: Get StatefulSet Logs
+
+    # Deployment restart
+    - ${{ if eq(parameters.restartType, 'deployment') }}:
+      - script: |
+          echo "Rolling restart of Deployment: ${{ parameters.deploymentName }}"
+          kubectl rollout restart deployment/${{ parameters.deploymentName }} -n ${{ parameters.aksNamespace }}
+        displayName: Restart Deployment
+
+      - script: |
+          echo "Fetching logs for Deployment: ${{ parameters.deploymentName }}"
+          kubectl logs deployment/${{ parameters.deploymentName }} -n ${{ parameters.aksNamespace }} || echo "Logs not found"
+        displayName: Get Deployment Logs
+
+    # Save and publish logs
+    - script: |
+        mkdir -p logs
+        echo "Describe output for ${{ parameters.restartType }}" > logs/restart.log
+        kubectl describe ${{ parameters.restartType }}/${{ parameters.podName || parameters.StatefulSetName || parameters.deploymentName }} -n ${{ parameters.aksNamespace }} >> logs/restart.log || echo "Describe failed"
+      displayName: Save Restart Logs
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Restart Logs
+      inputs:
+        targetPath: logs
+        artifactName: RestartLogs-${{ parameters.restartType }}
