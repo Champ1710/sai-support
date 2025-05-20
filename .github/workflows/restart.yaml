@@ -1,0 +1,66 @@
+# https://aka.ms/yaml
+parameters:
+- name: 'restartType'
+  default: ''
+  type: string
+  values:
+  - pod
+  - StatefulSet
+  - deployment
+- name: podName
+  displayName: "Pod name to restart (required if restartType = 'pod', else enter 'NA')"
+  type: string
+  default: ''
+- name: StatefulSetName
+  displayName: "StatefulSet name to restart (required if restartType = 'StatefulSet', else enter 'NA')"
+  type: string
+  default: ''
+- name: deploymentName
+  displayName: "Deployment name to restart (required if restartType = 'deployment', else enter 'NA')"
+  type: string
+  default: ''
+- name: aksNamespace
+  displayName: Namespace of the service
+  type: string
+  default: 'bdhp-platform'
+- name: deploymentStageName
+  displayName: deploymentStageName
+  type: string
+  values:
+  - 'dev_eus'
+  - 'test_eus'
+  - 'stage_eus'
+  - 'perf_eus'
+  - 'sbxga_eus'
+  - 'sbx_eus'
+  - 'perf2_eus'
+  - 'perf3_eus'
+- name: 'subscriptionPrefix'
+  type: string
+  default: BDHP
+ 
+trigger: none
+ 
+# no PR triggers
+pr: none
+ 
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: 'Hillrom-Enterprise/bdhp-platform'
+      ref: 'refs/heads/release/specific_service_restart'
+      endpoint: 'Hillrom-Enterprise'
+ 
+pool:
+  vmImage: ubuntu-latest
+ 
+extends:
+  template: support\pipelines\stages\restart_k8s_resources.yaml@templates  # Template reference
+  parameters:
+    podName: ${{ parameters.podName }}
+    deploymentStageName: ${{ parameters.deploymentStageName }}
+    aksNamespace: ${{ parameters.aksNamespace }}
+    restartType: ${{ parameters.restartType }}
+    StatefulSetName: ${{ parameters.StatefulSetName }}
+    deploymentName: ${{ parameters.deploymentName }}
