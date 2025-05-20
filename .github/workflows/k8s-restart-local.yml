@@ -1,0 +1,74 @@
+name: Kubernetes Restart Workflow (Local Runner)
+
+on:
+  workflow_dispatch:
+    inputs:
+      restartType:
+        description: 'Restart type (pod, deployment, StatefulSet)'
+        required: true
+        default: 'pod'
+      aksNamespace:
+        description: 'Kubernetes namespace'
+        required: true
+      servicename:
+        description: 'Name of the resource'
+        required: true
+
+jobs:
+  restart:
+    runs-on: self-hosted  # Ensure this runner has kubectl + kubeconfig access
+
+    env:
+      NAMESPACE: ${{ github.event.inputs.aksNamespace }}
+      SERVICENAME: ${{ github.event.inputs.servicename }}
+      RESTART_TYPE: ${{ github.event.inputs.restartType }}
+
+    steps:
+    - name: Restart Pod
+      if: env.RESTART_TYPE == 'pod'
+      run: |
+        echo "Restarting pod(s) for service: $SERVICENAME in namespace: $NAMESPACE"
+        kubectl delete pod -l app=$SERVICENAME -n $NAMESPACE
+
+    - name: Get Pod Logs
+      if: env.RESTART_TYPE == 'pod'
+      run: |
+        echo "Getting logs for pod(s) with label app=$SERVICENAME"
+        kubectl logs -l app=$SERVICENAME -n $NAMESPACE || echo "Logs retrieval failed"
+
+    - name: Restart StatefulSet
+      if: env.RESTART_TYPE == 'StatefulSet'
+      run: |
+        echo "Restarting StatefulSet: $SERVICENAME in namespace: $NAMESPACE"
+        kubectl rollout restart statefulset/$SERVICENAME -n $NAMESPACE
+
+    - name: Get StatefulSet Logs
+      if: env.RESTART_TYPE == 'StatefulSet'
+      run: |
+        echo "Fetching logs for StatefulSet: $SERVICENAME"
+        kubectl logs statefulset/$SERVICENAME -n $NAMESPACE || echo "Logs retrieval failed"
+
+    - name: Restart Deployment
+      if: env.RESTART_TYPE == 'deployment'
+      run: |
+        echo "Restarting Deployment: $SERVICENAME in namespace: $NAMESPACE"
+        kubectl rollout restart deployment/$SERVICENAME -n $NAMESPACE
+
+    - name: Get Deployment Logs
+      if: env.RESTART_TYPE == 'deployment'
+      run: |
+        echo "Fetching logs for Deployment: $SERVICENAME"
+        kubectl logs deployment/$SERVICENAME -n $NAMESPACE || echo "Logs retrieval failed"
+
+    - name: Save Logs to Artifact
+      run: |
+        mkdir -p logs
+        echo "Logs for $RESTART_TYPE: $SERVICENAME" > logs/restart.log
+        kubectl describe $RESTART_TYPE/$SERVICENAME -n $NAMESPACE >> logs/restart.log || echo "Describe failed"
+      shell: bash
+
+    - name: Upload Logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: RestartLogs-${{ github.event.inputs.restartType }}
+        path: logs/
