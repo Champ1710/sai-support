@@ -1,0 +1,118 @@
+import os
+import shutil
+import requests
+import subprocess
+import threading
+from bs4 import BeautifulSoup
+
+# Configs
+SNYK_TOKEN = "308d2f8c-929d-4a14-bafb-b26dcbb2deec"
+ORG = "bdhp-automation-test"
+SEVERITY = "high"
+IMAGES_URL = "https://lva-build.stg.baxter.com/offline/4.5.2-7.141.51-images.txt"
+CERT_PATH = None  # Use None to rely on system default CA certificates
+
+def get_snyk_cli_path():
+    # 1. Check env override
+    env_path = os.getenv("SNYK_CLI_PATH")
+    if env_path and os.path.isfile(env_path):
+        return env_path
+
+    # 2. Try to find snyk in PATH
+    found = shutil.which("snyk")
+    if found:
+        return found
+
+    raise FileNotFoundError(
+        "Snyk CLI executable not found. Install snyk CLI or set SNYK_CLI_PATH env var."
+    )
+
+def fetch_images_from_url(url, cert_path=None):
+    print(f"Fetching images from {url}...")
+    verify_value = cert_path if cert_path else True  # Use system default certs if None
+    response = requests.get(url, verify=verify_value)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'html.parser')
+    lines = soup.get_text().splitlines()
+    images = [line.strip() for line in lines if line.strip()]
+    print(f"Found {len(images)} images.")
+    return images
+
+def authenticate_snyk_api(token):
+    print("Authenticating with Snyk API...")
+    headers = {
+        "Authorization": f"token {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get("https://api.snyk.io/v1/user/me", headers=headers)
+    if response.status_code == 200:
+        print("✅ Authentication successful!")
+        return True
+    else:
+        print(f"❌ Authentication failed ({response.status_code}): {response.text}")
+        return False
+
+def stream_output(pipe, print_prefix=""):
+    for line in iter(pipe.readline, ''):
+        if line:
+            print(f"{print_prefix}{line.rstrip()}")
+    pipe.close()
+
+def scan_image_with_snyk_cli(image, snyk_cli_path):
+    try:
+        name_tag = image.split("/")[-1]
+        if ":" not in name_tag:
+            print(f"⚠️ Skipping invalid image tag (no colon found): {image}")
+            return
+        _, version = name_tag.split(":", 1)
+        tags = f"version={version}"
+    except Exception:
+        tags = ""
+
+    print(f"\n🔍 Scanning image: {image}")
+
+    cmd = [
+        snyk_cli_path, "container", "monitor",
+        f"--org={ORG}",
+        f"--severity-threshold={SEVERITY}",
+    ]
+    if tags:
+        cmd.append(f"--tags={tags}")
+    cmd.append(image)
+
+    print("Running command:", " ".join(cmd))
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    stdout_thread = threading.Thread(target=stream_output, args=(process.stdout,))
+    stderr_thread = threading.Thread(target=stream_output, args=(process.stderr, "ERR: "))
+
+    stdout_thread.start()
+    stderr_thread.start()
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    retcode = process.wait()
+    if retcode != 0:
+        print(f"❌ Scan failed for image: {image}")
+
+def main():
+    try:
+        snyk_cli_path = get_snyk_cli_path()
+    except FileNotFoundError as e:
+        print(str(e))
+        return
+
+    print(f"Using Snyk CLI: {snyk_cli_path}")
+
+    if not authenticate_snyk_api(SNYK_TOKEN):
+        print("Exiting due to authentication failure.")
+        return
+
+    images = fetch_images_from_url(IMAGES_URL, CERT_PATH)
+    for image in images:
+        scan_image_with_snyk_cli(image, snyk_cli_path)
+
+if __name__ == "__main__":
+    main()
