@@ -1,0 +1,73 @@
+import requests
+import subprocess
+ 
+# --- Configuration ---
+SNYK_TOKEN = "d0127510-b70c-4ac3-8e8c-5bf4add0420e"
+ORG = "bdhp-automation-test"
+SEVERITY = "high"
+REPOS_FILE = "repos.txt"
+SNYK_CLI = r"C:\Users\chandrs16\AppData\Roaming\npm\snyk.ps1"
+ 
+def authenticate_snyk():
+    """Authenticate with Snyk CLI using the provided token."""
+    print("🔐 Authenticating with Snyk CLI...")
+    try:
+        result = subprocess.run(["powershell", SNYK_CLI, "auth", SNYK_TOKEN], capture_output=True, text=True)
+        print("--- ✅ AUTH STDOUT ---")
+        print(result.stdout)
+        print("--- ⚠️ AUTH STDERR ---")
+        print(result.stderr)
+        if result.returncode != 0:
+            print("❌ Snyk authentication failed.")
+    except Exception as e:
+        print(f"❌ Authentication error: {e}")
+ 
+def scan_image(image_path):
+    """Scan a container image using Snyk CLI."""
+    try:
+        name_tag = image_path.split("/")[-1]
+        if ":" not in name_tag:
+            print(f"⚠️ Skipping invalid image tag format: {image_path}")
+            return
+ 
+        _, version = name_tag.split(":")
+        tags = f"version={version}"
+ 
+        print(f"\n=== 🔍 Scanning: {image_path} ===")
+        cmd = [
+            "powershell", SNYK_CLI, "container", "monitor",
+            f"--org={ORG}",
+            f"--tags={tags}",
+            image_path,
+            f"--severity-threshold={SEVERITY}"
+        ]
+ 
+        print("🔧 Running command:")
+        print(" ".join(cmd))
+ 
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        print("--- ✅ STDOUT ---")
+        print(result.stdout)
+        print("--- ⚠️ STDERR ---")
+        print(result.stderr)
+ 
+        if result.returncode != 0:
+            print(f"❌ Scan failed for image: {image_path}")
+    except Exception as e:
+        print(f"❌ Exception while scanning {image_path}: {e}")
+ 
+def main():
+    authenticate_snyk()
+ 
+    try:
+        with open(REPOS_FILE, 'r') as file:
+            images = [line.strip() for line in file if line.strip()]
+    except FileNotFoundError:
+        print(f"❌ File not found: {REPOS_FILE}")
+        return
+ 
+    for image in images:
+        scan_image(image)
+ 
+if __name__ == "__main__":
+    main()
