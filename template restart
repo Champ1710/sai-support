@@ -1,0 +1,55 @@
+parameters:
+- name: AutomationDeploymentServiceConnection
+  type: string
+- name: restartType
+  type: string
+- name: aksNamespace
+  type: string
+- name: Servicename
+  type: string
+
+steps:
+# Pod Restart Logic
+- ${{ if eq(parameters.restartType, 'pod') }}:
+  - template: aks_pod_restarts.yaml@templates
+    parameters:
+      AutomationDeploymentServiceConnection: ${{ parameters.AutomationDeploymentServiceConnection }}
+      restartType: ${{ parameters.restartType }}
+      aksNamespace: ${{ parameters.aksNamespace }}
+      Servicename: ${{ parameters.Servicename }}
+
+  - template: aks_pod_get_logs.yaml@templates
+    parameters:
+      AutomationDeploymentServiceConnection: ${{ parameters.AutomationDeploymentServiceConnection }}
+      getLogsFor: ${{ parameters.restartType }}
+      aksNamespace: ${{ parameters.aksNamespace }}
+      Servicename: ${{ parameters.Servicename }}
+
+# StatefulSet Restart Logic
+- ${{ if eq(parameters.restartType, 'StatefulSet') }}:
+  - script: |
+      echo "Restarting StatefulSet: ${{ parameters.Servicename }} in namespace ${{ parameters.aksNamespace }}"
+      kubectl rollout restart statefulset/${{ parameters.Servicename }} -n ${{ parameters.aksNamespace }}
+    displayName: Restart StatefulSet
+
+  - script: |
+      echo "Fetching logs for StatefulSet: ${{ parameters.Servicename }}"
+      kubectl logs statefulset/${{ parameters.Servicename }} -n ${{ parameters.aksNamespace }}
+    displayName: Get StatefulSet Logs
+
+# Deployment Restart Logic
+- ${{ if eq(parameters.restartType, 'deployment') }}:
+  - script: |
+      echo "Restarting Deployment: ${{ parameters.Servicename }} in namespace ${{ parameters.aksNamespace }}"
+      kubectl rollout restart deployment/${{ parameters.Servicename }} -n ${{ parameters.aksNamespace }}
+    displayName: Restart Deployment
+
+  - script: |
+      echo "Fetching logs for Deployment: ${{ parameters.Servicename }}"
+      kubectl logs deployment/${{ parameters.Servicename }} -n ${{ parameters.aksNamespace }}
+    displayName: Get Deployment Logs
+
+# Optional: Publish logs or artifacts
+- template: ../../../workflow-templates/ci-cd/shared/tasks/publish_pipeline_artifacts.yaml@templates
+  parameters:
+    artifactName: 'RestartLogs-${{ parameters.restartType }}'
