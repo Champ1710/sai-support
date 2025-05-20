@@ -1,0 +1,29 @@
+parameters:
+- name: restartType
+  type: string
+  default: 'pod'
+  values:
+  - pod
+  - StatefulSet
+  - deployment
+- name: Servicename
+  type: string
+  default: ''
+- name: aksNamespace
+  type: string
+  default: 'bdhp-platform'
+
+stages:
+- stage: RestartService
+  displayName: Restart Service Based on Type
+  jobs:
+  - job: RestartJob
+    displayName: Restart Job
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: templates/restart_logic.yaml
+      parameters:
+        restartType: ${{ parameters.restartType }}
+        aksNamespace: ${{ parameters.aksNamespace }}
+        Servicename: ${{ parameters.Servicename }}
