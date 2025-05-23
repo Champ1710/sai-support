@@ -1,0 +1,11 @@
+│ Error: Put "https://us-dev.bdhp.baxter.com/rabbit/api/users/hpl_user": EOF
+│
+│   with rabbitmq_user.hpl_user,
+│   on app_aks_hpl_core.tf line 22, in resource "rabbitmq_user" "hpl_user":
+│   22: resource "rabbitmq_user" "hpl_user" {
+
+resource "rabbitmq_user" "hpl_user" {
+  name     = azurerm_key_vault_secret.rabbitmq_hpl_username.value
+  password = azurerm_key_vault_secret.rabbitmq_hpl_password.value
+  tags     = ["policymaker", "monitoring", "management"]
+}
