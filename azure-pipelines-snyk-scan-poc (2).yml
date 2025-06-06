@@ -1,0 +1,113 @@
+name: snyk-container-scan
+
+trigger: none  # Manual run only
+
+parameters:
+  - name: snykOrg
+    type: string
+    default: 'bdhp-automation-test'
+  
+#   - name: imagelistVersion
+#     type: string
+#     default: ''
+
+variables:
+  SNYK_SEVERITY: 'high'
+  dockerRegistryServiceConnection: 'BDHP Container Registry-$(System.TeamProject)'
+
+resources:
+  repositories:
+    - repository: supportPipelines
+      type: github
+      name: Hillrom-Enterprise/bdhp-devops-support-pipelines
+      ref: refs/heads/release/snyk_poc
+      endpoint: Hillrom-Enterprise
+
+stages:
+- stage: snykScan
+  displayName: Run Snyk Container Scan
+  jobs:
+  - job: scanJob
+    displayName: Snyk Scan Job
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+      displayName: 'Install Node.js'
+    - script: npm install -g snyk
+      displayName: 'Install Snyk CLI'
+
+    - script: snyk auth $(SNYK_TOKEN)
+      displayName: 'Authenticate Snyk CLI'
+
+    - task: Docker@2
+      displayName: 'Docker Login to ACR'
+      inputs:
+        command: login
+        containerRegistry: ${{ variables.dockerRegistryServiceConnection }}
+    #     # sudo export certificate= $(Agent.TempDirectory)/certs.crt
+    
+    # - script: |
+    #     echo "Creating Snyk organization: ${{ parameters.snykOrg }}"
+
+    #     response=$(curl -s -w "\n%{http_code}" --request POST \
+    #       --url https://api.snyk.io/rest/orgs \
+    #       --header "Authorization: token $(SNYK_TOKEN)" \
+    #       --header "Content-Type: application/json" \
+    #       --data "{ \"name\": \"${{ parameters.snykOrg }}\" }")
+
+    #     # Split response and status
+    #     body=$(echo "$response" | head -n -1)
+    #     status=$(echo "$response" | tail -n1)
+
+    #     if [ "$status" -eq 201 ]; then
+    #       echo "Org created successfully:"
+    #       echo "$body"
+    #     elif [ "$status" -eq 409 ]; then
+    #       echo "Org already exists or name conflict"
+    #       echo "$body"
+    #     else
+    #       echo "Failed to create Snyk org (HTTP $status)"
+    #       echo "$body"
+    #       exit 1
+    #     fi
+    #   displayName: 'Create Snyk Organization via API'
+    - script: |
+        echo "Listing .txt blobs in container using SAS..."
+
+        latest_blob=$(az storage blob list \
+        --account-name bdhpeusdevopspoc \
+        --container-name snykpoc \
+        --sas-token "$(SNYK_SAS_TOKEN)" \
+        --query "sort_by([].{name:name, time:properties.lastModified}, &time)[-1].name" \
+        --output tsv)
+
+        echo "Latest blob found: $latest_blob"
+
+        echo "##vso[task.setvariable variable=LATEST_IMAGE_FILE]$latest_blob"
+      displayName: 'Determine latest image list file'
+    # - script: |
+    #     curl -o snyk_images_poc.txt "$(SNYK_BLOB_URL)"
+    #   displayName: 'Download snyk_images_poc.txt from Azure Blob'
+    # custom_url="$(SNYK_BLOB_BASE_URL)/${{ parameters.imagelistVersion }}.txt?$(SNYK_SAS_TOKEN)"
+    # - script: |
+    #     custom_url="$(SNYK_BLOB_BASE_URL)/$(LATEST_IMAGE_FILE)?$(SNYK_SAS_TOKEN)"
+    #     echo "Downloading image list from $custom_url"
+    #     curl -o snyk_images_poc.txt "$custom_url"
+    #   displayName: 'Download versioned image list from Blob'  
+      
+    # - script: |
+    #     pip install requests beautifulsoup4
+    #   displayName: 'Install Python Dependencies'
+ 
+    # - script: |
+    #     python snykpoctxt.py
+    #   env:
+    #     SNYK_TOKEN: $(SNYK_TOKEN)
+    #     SNYK_ORG: ${{ parameters.snykOrg }}
+    #     IMAGES_FILE: snyk_images_poc.txt
+    #     SNYK_SEVERITY: $(SNYK_SEVERITY)
+    #   displayName: 'Run Snyk Scan Script'
