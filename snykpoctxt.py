@@ -1,0 +1,113 @@
+import os
+import shutil
+import requests
+import subprocess
+import threading
+from bs4 import BeautifulSoup
+
+# Configs
+SNYK_TOKEN = os.getenv("SNYK_TOKEN")
+ORG = os.getenv("SNYK_ORG")
+SEVERITY = os.getenv("SNYK_SEVERITY", "high")
+IMAGES_FILE = os.getenv("IMAGES_FILE")
+CERT_PATH = os.getenv("CERT_PATH", "certs.crt")  # fallback to default file name
+
+def get_snyk_cli_path():
+    env_path = os.getenv("SNYK_CLI_PATH")
+    if env_path and os.path.isfile(env_path):
+        return env_path
+
+    found = shutil.which("snyk")
+    if found:
+        return found
+
+    raise FileNotFoundError(
+        "Snyk CLI executable not found. Install snyk CLI or set SNYK_CLI_PATH env var."
+    )
+
+def fetch_images_from_file(file_path):
+    print(f"Reading images from local file: {file_path}")
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    images = [line.strip() for line in lines if line.strip()]
+    print(f"Found {len(images)} images.")
+    return images
+
+def authenticate_snyk_api(token):
+    print("Authenticating with Snyk API...")
+    headers = {
+        "Authorization": f"token {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get("https://api.snyk.io/v1/user/me", headers=headers)
+    if response.status_code == 200:
+        print(" Authentication successful!")
+        return True
+    else:
+        print(f" Authentication failed ({response.status_code}): {response.text}")
+        return False
+
+def stream_output(pipe, print_prefix=""):
+    for line in iter(pipe.readline, ''):
+        if line:
+            print(f"{print_prefix}{line.rstrip()}")
+    pipe.close()
+
+def scan_image_with_snyk_cli(image, snyk_cli_path):
+    try:
+        name_tag = image.split("/")[-1]
+        if ":" not in name_tag:
+            print(f"Skipping invalid image tag (no colon found): {image}")
+            return
+        _, version = name_tag.split(":", 1)
+        tags = f"version={version}"
+    except Exception:
+        tags = ""
+
+    print(f"\n Scanning image: {image}")
+
+    cmd = [
+        snyk_cli_path, "container", "monitor",
+        f"--org={ORG}",
+        f"--severity-threshold={SEVERITY}",
+    ]
+    if tags:
+        cmd.append(f"--tags={tags}")
+    cmd.append(image)
+
+    print("Running command:", " ".join(cmd))
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    stdout_thread = threading.Thread(target=stream_output, args=(process.stdout,))
+    stderr_thread = threading.Thread(target=stream_output, args=(process.stderr, "ERR: "))
+
+    stdout_thread.start()
+    stderr_thread.start()
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    retcode = process.wait()
+    if retcode != 0:
+        print(f" Scan failed for image: {image}")
+
+def main():
+    try:
+        snyk_cli_path = get_snyk_cli_path()
+    except FileNotFoundError as e:
+        print(str(e))
+        return
+
+    print(f"Using Snyk CLI: {snyk_cli_path}")
+
+    if not authenticate_snyk_api(SNYK_TOKEN):
+        print("Exiting due to authentication failure.")
+        return
+
+    images = fetch_images_from_file(IMAGES_FILE)
+    for image in images:
+        scan_image_with_snyk_cli(image, snyk_cli_path)
+
+if __name__ == "__main__":
+    main()
