@@ -1,0 +1,357 @@
+# https://aka.ms/yaml
+parameters:
+- name: 'betaVersion'
+  default: 'false'
+- name: 'DevOpsCommonKVServiceConnection'
+  default: 'BDHP Automation Deployment Account - Prod-$(System.TeamProject)'
+- name: DevOpsCommonKeyVault
+  type: string
+  default: 'bdhp-devops-kv'
+- name: 'ACRServiceConnection'
+  default: 'BDHP Automation Deployment Account - Prod-$(System.TeamProject)'
+- name: 'containerRegistryName'
+  default: '$(containerRegistryName)'
+- name: 'docker'
+  default: 'false'
+- name: 'helm'
+  default: 'false'
+
+steps:
+- task: AzureKeyVault@2
+  displayName: 'Azure Key Vault: ${{ parameters.DevOpsCommonKeyVault }}'
+  inputs:
+    azureSubscription: ${{ parameters.DevOpsCommonKVServiceConnection }}
+    KeyVaultName: ${{ parameters.DevOpsCommonKeyVault }}
+    SecretsFilter: 'GitHubOwner,GitHubPAT'
+
+- powershell: |
+    Install-Module -Name powershell-yaml -RequiredVersion 0.4.7 -Force
+    
+    $repo_folder = "$(System.DefaultWorkingDirectory)"
+    if(Test-Path -Path "$repo_folder/charts")
+    {
+      $chartyaml_filepath = (Get-ChildItem "$repo_folder/charts" | Where-Object{$_.Name -eq 'chart.yaml'}).FullName
+      $chartyaml_content = Get-Content -Path $chartyaml_filepath | ConvertFrom-Yaml
+      $chartyaml_version = $chartyaml_content.version
+      $chartname = $chartyaml_content.name
+      $chartyaml_major_version = ($chartyaml_version).split('.')[0]
+    }
+    else
+    {
+      $chartyaml_version = ''
+      $chartname = '$(ServiceName)'
+      $chartyaml_major_version = ''
+    }
+    Write-Host "Chart major version : $chartyaml_major_version"
+
+    $SourceBranch = "$(Build.SourceBranch)"
+    $SourceBranch = ($SourceBranch.replace('refs/heads/',''))
+    Write-Host "SourceBranch ---  $SourceBranch"
+    
+    ##Sort tags and get the latest tag
+    #$ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
+    #$repo_latest_tag = git -C "$repo_folder" tag --list | Where-Object{($_).startswith("$chartyaml_major_version") } | Sort-Object $ToNatural -Descending | Select-Object -First 1
+    $repo_latest_tag = git -C "$repo_folder" describe --tags --abbrev=0 | Where-Object{($_).startswith("$chartyaml_major_version")}
+    if ($LASTEXITCODE -ne 0)
+    {
+      Write-Host "No Tags Exist for the repo and current branch"
+      $repo_latest_tag = ''
+      $LASTEXITCODE = 0
+    }
+    Write-Host "Repo latest tag for major version: $repo_latest_tag"
+
+    if([string]::IsNullOrEmpty($repo_latest_tag))
+    {
+      $repo_latest_tag = "$chartyaml_version"
+    }
+    else
+    {
+      ##Remove characters from string and extract version only
+      $Regex = '[\d\.]+';
+      $repo_latest_tag = ([Regex]::Matches($repo_latest_tag, $Regex))[0].value;
+    }
+    
+
+    if (($SourceBranch.tolower()).startswith('release') -or ($SourceBranch.tolower()).startswith('hotfix'))
+    {
+      $version = "$(Build.SourceBranchName)"
+    }
+    else
+    {
+      $build_version = ((Get-Date).ToUniversalTime()).ToString('yyyyMMddHHmmss')
+      if([string]::IsNullOrEmpty($chartyaml_version))
+      {
+        $version = "0.0.1-build.$($build_version)"
+        ##$version = $repo_latest_tag
+      }
+      else
+      {
+        $betaVersion = "${{ parameters.betaVersion }}"
+        if($betaVersion -eq 'true')
+        {
+          $version = $chartyaml_version+'-beta.'+$build_version
+        }
+        else
+        {
+          [int]$major = ($repo_latest_tag.Split('.'))[0]
+          [int]$minor = ($repo_latest_tag.Split('.'))[1]
+          [int]$patch = ($repo_latest_tag.Split('.'))[2]
+          Write-Host "major:minor:patch -- $($major):$($minor):$($patch)"
+
+          $repositoryname = "$(Build.Repository.Name)"
+          $buildSourceVersion = "$(Build.SourceVersion)"
+          $buildSourceBranch = "$(Build.SourceBranch)"
+          $githubPAT = "$(GitHubPAT)"
+          $headers = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($githubPAT)"))}
+          
+          if(($buildSourceBranch).startswith('refs/pull/'))
+          {
+            $pullRequest = "$(($buildSourceBranch.split('/'))[2])"
+            
+            $sourcepullRequestDetailsUrl = "https://api.github.com/repos/$($RepositoryName)/pulls/$($pullRequest)"
+            $sourcepullRequestDetails = invoke-restmethod -method get -uri $sourcepullRequestDetailsUrl -headers $headers
+
+            $buildSourceBranchRefName = $sourcepullRequestDetails.base.ref
+            $pullSourceBranch = $sourcepullRequestDetails.head.ref
+          }
+          else
+          {
+            $sourceVersionPullsUrl = "https://api.github.com/repos/$($RepositoryName)/commits/$buildSourceVersion/pulls"
+            $sourceVersionPulls = invoke-restmethod -method get -uri $sourceVersionPullsUrl -headers $headers
+
+            $buildSourceBranchRefName = $($buildSourceBranch -replace ('refs/heads/',''))
+            Foreach($pull in $sourceVersionPulls)
+            {
+              if($pull.base.ref -eq "$($buildSourceBranchRefName)")
+              {
+                $pullSourceBranch = $pull.head.ref
+              }
+            }
+          }
+
+          Write-Host "repositoryname --- $repositoryname || buildSourceVersion --- $buildSourceVersion || buildSourceBranchRefName --- $buildSourceBranchRefName || pullSourceBranch --- $pullSourceBranch"
+
+          # # Parse message for commit type
+          # $GIT_COMMIT_MSG = "$(Build.SourceVersionMessage)"
+          # #$GIT_COMMIT_MSG = ('git log -1 --grep="Pull request #" --invert-grep --pretty=oneline').trim()
+          # Write-Host "GIT_COMMIT_MSG -- '$GIT_COMMIT_MSG'"
+          # if($GIT_COMMIT_MSG -match 'bug' -or $GIT_COMMIT_MSG -match 'fix')
+
+          if($pullSourceBranch -match 'bug' -or $pullSourceBranch -match 'fix')
+          {
+              $patch++
+              Write-Host "Commit identified as bug: incrementing patch version to $patch"
+          }
+          else
+          {
+              $minor++
+              $patch = 0
+              Write-Host "Commit identified as feature: incrementing minor version to $minor"
+          }
+
+          Write-Host "major:minor:patch -- $($major):$($minor):$($patch)"
+          $version = "$($major).$($minor).$($patch)"
+        }
+      }
+    }
+
+    $chartname = $chartname.tolower()
+    # $chartNameSuffix = (get-item -Path "Env:*" | Where-Object{$_.Name -eq 'chartNameSuffix'}).value
+    # if(![string]::IsNullOrWhiteSpace($chartNameSuffix)){
+    #   $chartname = "$($chartname)-$($chartNameSuffix)"
+    # }
+
+    if(![string]::IsNullOrEmpty($chartyaml_filepath)){
+      $chartyaml_content.name = $chartname
+      $chartyaml_content.appVersion = $version
+      $chartyaml_content.version = $version
+      ($chartyaml_content | ConvertTo-Yaml) | Set-Content -Path $chartyaml_filepath
+    }
+    
+    $dockerACRRepositoryName = "images/$chartname"
+    $dockerImageVersion = "$version" 
+    Write-Host "##vso[task.setvariable variable=dockerACRRepositoryName;]$dockerACRRepositoryName"
+    Write-Host "##vso[task.setvariable variable=dockerImageVersion;]$dockerImageVersion"
+    Write-Host "dockerACRRepositoryName --- $dockerACRRepositoryName --- dockerImageVersion --- $dockerImageVersion"
+    
+    $helmChartName = "$chartname"
+    $helmACRRepositoryName = "charts/$chartname"
+    $helmChartVersion = "$version"
+    Write-Host "##vso[task.setvariable variable=helmChartName;]$helmChartName"
+    Write-Host "##vso[task.setvariable variable=helmACRRepositoryName;]$helmACRRepositoryName"
+    Write-Host "##vso[task.setvariable variable=helmChartVersion;]$helmChartVersion"
+    Write-Host "helmACRRepositoryName --- $helmACRRepositoryName --- helmChartVersion --- $helmChartVersion"
+
+    $githubTagVersion = "$version"
+    Write-Host "##vso[task.setvariable variable=githubTagVersion;]$githubTagVersion"
+    Write-Host "githubTagVersion --- $githubTagVersion"
+
+  displayName: 'Generate Version for Docker and Helm charts - PowerShell Script'
+
+- task: AzureCLI@2
+  displayName: 'Verify if current version already exists - Azure CLI'
+  inputs:
+    azureSubscription: ${{ parameters.ACRServiceConnection }}
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+
+      ### Check GitHub Version Tag
+      $githubOwner = "$(GitHubOwner)"
+      $githubPAT = "$(GitHubPAT)"
+
+      $githubRepositoryName = "$(Build.Repository.Name)"
+      $githubRepositoryName = $githubRepositoryName -replace ("$($githubOwner)/","")
+      $githubTagVersion = "$(githubTagVersion)"
+
+      $Headers = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($githubPAT)"))}
+
+      $refTagsUrl = "https://api.github.com/repos/$($githubOwner)/$($githubRepositoryName)/git/refs/tags"
+      Write-Host "refTagsUrl --- $refTagsUrl"
+      try
+      {
+          $GitHubCurrentVersionTag = (Invoke-RestMethod -Method get -Uri $refTagsUrl -Headers $Headers) | Where-Object {$_.ref -eq "refs/tags/$($githubTagVersion)"}
+      }
+      catch
+      {
+          if($_.Exception.Response.StatusCode.value__ -eq '404')
+          {
+              Write-Host "StatusCode: $($_.Exception.Response.StatusCode.value__)"
+              Write-Host "StatusDescription: $($_.Exception.Response.StatusDescription)"
+          }
+          else
+          {
+              Write-Error "StatusCode: $($_.Exception.Response.StatusCode.value__)"
+              Write-Error "StatusDescription: $($_.Exception.Response.StatusDescription)"
+              Write-Error "$($_)"
+          }
+      }
+      
+      if([string]::IsNullOrEmpty($GitHubCurrentVersionTag))
+      {
+        Write-Host "Github repository '$githubRepositoryName' doesn't contain a version tag '$githubTagVersion'"
+      }
+      else
+      {
+        Write-Host "Github repository '$githubRepositoryName' contains a version tag '$githubTagVersion'. Please use a different version tag."
+      }
+
+
+      ### Check Docker Version Tag
+      $docker = "${{ parameters.docker }}"
+      if($docker -eq 'true')
+      {
+        $containerRegistryName = "${{ parameters.containerRegistryName }}"
+        $dockerImageVersion = "$(dockerImageVersion)"
+        $dockerACRRepositoryName = "$(dockerACRRepositoryName)"
+
+        $dockerACRRepository = (az acr repository list -n 'bdhpcr' --query "[?@=='$dockerACRRepositoryName']" | ConvertFrom-Json)
+        if([string]::IsNullOrEmpty($dockerACRRepository))
+        {
+          Write-Host "docker repository '$dockerACRRepositoryName' doesn't exist in Container registry '$containerRegistryName'"
+        }
+        else
+        {
+          $dockerCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $dockerACRRepositoryName | ConvertFrom-Json) | Where-Object{$_ -eq "$($dockerImageVersion)"}
+          if([string]::IsNullOrEmpty($dockerCurrentVersionTag))
+          {
+            Write-Host "docker repository '$dockerACRRepositoryName' doesn't contain a version tag '$dockerImageVersion' in Container registry '$containerRegistryName'"
+          }
+          else
+          {
+            Write-Host "docker repository '$dockerACRRepositoryName' contains a version tag '$dockerImageVersion' in Container registry '$containerRegistryName'. Please use a different version tag."
+          }
+        }
+      }
+
+
+      ### Check Helm Version Tag
+      $helm = "${{ parameters.helm }}"
+      if($helm -eq 'true')
+      {
+        $env:HELM_EXPERIMENTAL_OCI=1
+
+        $containerRegistryName = "${{ parameters.containerRegistryName }}"
+        $helmChartVersion = "$(helmChartVersion)"
+        $helmACRRepositoryName = "$(helmACRRepositoryName)"
+
+        $helmACRRepository = (az acr repository list -n 'bdhpcr' --query "[?@=='$helmACRRepositoryName']" | ConvertFrom-Json)
+        if([string]::IsNullOrEmpty($helmACRRepository))
+        {
+          Write-Host "helm repository '$helmACRRepositoryName' doesn't exist in Container registry '$containerRegistryName'"
+        }
+        else
+        {
+          $helmCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $helmACRRepositoryName -o json | ConvertFrom-Json) | Where-Object {$_ -eq "$helmChartVersion"}
+          if([string]::IsNullOrEmpty($helmCurrentVersionTag))
+          {
+            Write-Host "helm repository '$helmACRRepositoryName' doesn't contain a version tag '$helmChartVersion' in Container registry '$containerRegistryName'"
+          }
+          else
+          {
+            Write-Host "helm repository 'helmACRRepositoryName' contains a version tag '$helmChartVersion' in Container registry '$containerRegistryName'. Please use a different version tag."
+          }
+        }
+      }
+      $version = $githubTagVersion
+      Write-Host "Repo latest tag for major version: $repo_latest_tag"
+      [int]$major = ($githubTagVersion.Split('.'))[0]
+      [int]$minor = ($githubTagVersion.Split('.'))[1]
+      [int]$patch = ($githubTagVersion.Split('.'))[2]
+      # while (
+      #   "$GitHubCurrentVersionTag" -eq "$githubTagVersion" -or
+      #   "$dockerCurrentVersionTag" -eq "$dockerImageVersion" -or
+      #   "$helmCurrentVersionTag" -eq "$helmChartVersion"
+      # )
+      # {
+      #   $version = $githubTagVersion
+      #   Write-Host "Version $version already exists in one or more registries. Auto-bumping..."
+
+      #   if ($pullSourceBranch -match 'bug' -or $pullSourceBranch -match 'fix') {
+      #       $patch++
+      #   } else {
+      #       $minor++
+      #       $patch = 0
+      #   }
+      #   $version = "$($major).$($minor).$($patch)"
+      #   $dockerImageVersion = "$version"
+      #   $githubTagVersion = "$version"
+      #   $helmChartVersion = "$version"
+      #   Write-Host "Trying bumped version: $version"
+      #   Write-Host "##vso[task.setvariable variable=githubTagVersion;]$version"
+      #   Write-Host "##vso[task.setvariable variable=dockerImageVersion;]$version"
+      #   Write-Host "##vso[task.setvariable variable=helmChartVersion;]$version"
+      # }
+      do {
+          $version = "$($major).$($minor).$($patch)"
+          $dockerImageVersion = "$version"
+          $githubTagVersion = "$version"
+          $helmChartVersion = "$version"
+         
+          # Recheck Docker and Helm for this version
+          $dockerCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $dockerACRRepositoryName | ConvertFrom-Json) | Where-Object { $_ -eq "$dockerImageVersion" }
+          $helmCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $helmACRRepositoryName -o json | ConvertFrom-Json) | Where-Object { $_ -eq "$helmChartVersion" }
+          $GitHubCurrentVersionTag = (Invoke-RestMethod -Method get -Uri $refTagsUrl -Headers $Headers) | Where-Object {$_.ref -eq "refs/tags/$($githubTagVersion)"}
+          if (
+              -not [string]::IsNullOrEmpty($dockerCurrentVersionTag) -or
+              -not [string]::IsNullOrEmpty($helmCurrentVersionTag) -or
+              -not [string]::IsNullOrEmpty($GitHubCurrentVersionTag)
+          ) {
+              Write-Host "Version $version already exists in one or more registries. Auto-bumping..."
+              if ($pullSourceBranch -match 'bug' -or $pullSourceBranch -match 'fix') {
+                  $patch++
+              } else {
+                  $minor++
+                  $patch = 0
+              }
+          }
+          #update pipeline variables
+          Write-Host "##vso[task.setvariable variable=githubTagVersion;]$githubTagVersion" 
+          Write-Host "##vso[task.setvariable variable=dockerImageVersion;]$dockerImageVersion"
+          Write-Host "##vso[task.setvariable variable=helmChartVersion;]$helmChartVersion"
+      } while (
+          -not [string]::IsNullOrEmpty($dockerCurrentVersionTag) -or
+          -not [string]::IsNullOrEmpty($helmCurrentVersionTag) -or
+          -not [string]::IsNullOrEmpty($GitHubCurrentVersionTag)
+      )
+      Write-Host "Final Version: $version"
