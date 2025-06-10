@@ -1,0 +1,18 @@
+# templates/run-snyk-scan.yml
+parameters:
+  - name: snykOrg
+    type: string
+
+steps:
+  - script: |
+      pip install requests beautifulsoup4
+    displayName: 'Install Python Dependencies'
+
+  - script: |
+      python snykpoctxt.py
+    env:
+      SNYK_TOKEN: $(SNYK_TOKEN)
+      SNYK_ORG: ${{ parameters.snykOrg }}
+      IMAGES_FILE: snyk_images_poc.txt
+      SNYK_SEVERITY: $(SNYK_SEVERITY)
+    displayName: 'Run Snyk Scan Script'
