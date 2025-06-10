@@ -1,0 +1,37 @@
+# templates/download-image-list.yml
+parameters:
+  - name: imagelistVersion
+    type: string
+    default: ''
+
+steps:
+  - script: |
+      echo "Resolving image list blob..."
+      az storage blob list \
+        --account-name bdhpeusdevopspoc \
+        --container-name snykpoc \
+        --sas-token "$(SNYK_SAS_TOKEN)" \
+        --query "[?contains(name, '.txt')].name" -o tsv
+
+      blob="${{ parameters.imagelistVersion }}"
+      if [ -z "$blob" ]; then
+        blob=$(az storage blob list \
+          --account-name bdhpeusdevopspoc \
+          --container-name snykpoc \
+          --sas-token "$(SNYK_SAS_TOKEN)" \
+          --query "sort_by([?contains(name, '.txt')], &properties.lastModified)[-1].name" -o tsv)
+      else
+        blob="${blob}.txt"
+      fi
+
+      echo "Using blob: $blob"
+      echo "##vso[task.setvariable variable=LATEST_IMAGE_FILE]$blob"
+
+      az storage blob download \
+        --account-name bdhpeusdevopspoc \
+        --container-name snykpoc \
+        --name "$blob" \
+        --file snyk_images_poc.txt \
+        --sas-token "$(SNYK_SAS_TOKEN)" \
+        --output none
+    displayName: 'Resolve & Download Blob'
