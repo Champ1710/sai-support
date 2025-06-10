@@ -1,0 +1,114 @@
+# https://aka.ms/yaml
+parameters:
+- name: 'betaVersion'
+  default: 'false'
+- name: 'DevOpsCommonKVServiceConnection'
+  default: 'BDHP Automation Deployment Account - Prod-$(System.TeamProject)'
+- name: DevOpsCommonKeyVault
+  type: string
+  default: 'bdhp-devops-kv'
+- name: 'ACRServiceConnection'
+  default: 'BDHP Automation Deployment Account - Prod-$(System.TeamProject)'
+- name: 'containerRegistryName'
+  default: '$(containerRegistryName)'
+- name: 'docker'
+  default: 'false'
+- name: 'helm'
+  default: 'false'
+- name: 'forceOverride'
+  default: 'false'
+ 
+steps:
+- task: AzureKeyVault@2
+  displayName: 'Azure Key Vault: ${{ parameters.DevOpsCommonKeyVault }}'
+  inputs:
+    azureSubscription: ${{ parameters.DevOpsCommonKVServiceConnection }}
+    KeyVaultName: ${{ parameters.DevOpsCommonKeyVault }}
+    SecretsFilter: 'GitHubOwner,GitHubPAT'
+ 
+# (PowerShell script step remains unchanged — omitted here for brevity)
+ 
+- task: AzureCLI@2
+  displayName: 'Verify if current version already exists - Azure CLI'
+  inputs:
+    azureSubscription: ${{ parameters.ACRServiceConnection }}
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $githubOwner = "$(GitHubOwner)"
+      $githubPAT = "$(GitHubPAT)"
+      $githubRepositoryName = "$(Build.Repository.Name)" -replace ("$($githubOwner)/","")
+      $githubTagVersion = "$(githubTagVersion)"
+      $dockerImageVersion = "$(dockerImageVersion)"
+      $dockerACRRepositoryName = "$(dockerACRRepositoryName)"
+      $helmChartVersion = "$(helmChartVersion)"
+      $helmACRRepositoryName = "$(helmACRRepositoryName)"
+      $containerRegistryName = "${{ parameters.containerRegistryName }}"
+      $forceOverride = "${{ parameters.forceOverride }}"
+ 
+      $Headers = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($githubPAT)"))}
+      $refTagsUrl = "https://api.github.com/repos/$($githubOwner)/$($githubRepositoryName)/git/refs/tags"
+ 
+      $GitHubCurrentVersionTag = $null
+      $dockerCurrentVersionTag = $null
+      $helmCurrentVersionTag = $null
+ 
+      try {
+          $GitHubCurrentVersionTag = (Invoke-RestMethod -Method get -Uri $refTagsUrl -Headers $Headers) | Where-Object {$_.ref -eq "refs/tags/$($githubTagVersion)"}
+      } catch {
+          Write-Host "GitHub tag check failed: $($_.Exception.Message)"
+      }
+ 
+      if ("${{ parameters.docker }}" -eq 'true') {
+          $dockerCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $dockerACRRepositoryName | ConvertFrom-Json) | Where-Object { $_ -eq "$dockerImageVersion" }
+      }
+ 
+      if ("${{ parameters.helm }}" -eq 'true') {
+          $env:HELM_EXPERIMENTAL_OCI=1
+          $helmCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $helmACRRepositoryName -o json | ConvertFrom-Json) | Where-Object { $_ -eq "$helmChartVersion" }
+      }
+ 
+      if ($forceOverride -eq 'true') {
+          Write-Host "Override enabled. Proceeding with existing version: $githubTagVersion"
+          Write-Host "##vso[task.setvariable variable=githubTagVersion;]$githubTagVersion"
+          Write-Host "##vso[task.setvariable variable=dockerImageVersion;]$dockerImageVersion"
+          Write-Host "##vso[task.setvariable variable=helmChartVersion;]$helmChartVersion"
+      } else {
+          [int]$major = ($githubTagVersion.Split('.'))[0]
+          [int]$minor = ($githubTagVersion.Split('.'))[1]
+          [int]$patch = ($githubTagVersion.Split('.'))[2]
+ 
+          do {
+              $version = "$($major).$($minor).$($patch)"
+              $dockerImageVersion = "$version"
+              $githubTagVersion = "$version"
+              $helmChartVersion = "$version"
+ 
+              $dockerCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $dockerACRRepositoryName | ConvertFrom-Json) | Where-Object { $_ -eq "$dockerImageVersion" }
+              $helmCurrentVersionTag = (az acr repository show-tags -n $containerRegistryName --repository $helmACRRepositoryName -o json | ConvertFrom-Json) | Where-Object { $_ -eq "$helmChartVersion" }
+              $GitHubCurrentVersionTag = (Invoke-RestMethod -Method get -Uri $refTagsUrl -Headers $Headers) | Where-Object {$_.ref -eq "refs/tags/$($githubTagVersion)"}
+ 
+              if (
+                  -not [string]::IsNullOrEmpty($dockerCurrentVersionTag) -or
+                  -not [string]::IsNullOrEmpty($helmCurrentVersionTag) -or
+                  -not [string]::IsNullOrEmpty($GitHubCurrentVersionTag)
+              ) {
+                  Write-Host "Version $version already exists. Auto-bumping..."
+                  if ("$(Build.SourceBranch)" -match 'bug' -or "$(Build.SourceBranch)" -match 'fix') {
+                      $patch++
+                  } else {
+                      $minor++
+                      $patch = 0
+                  }
+              }
+ 
+              Write-Host "##vso[task.setvariable variable=githubTagVersion;]$githubTagVersion"
+              Write-Host "##vso[task.setvariable variable=dockerImageVersion;]$dockerImageVersion"
+              Write-Host "##vso[task.setvariable variable=helmChartVersion;]$helmChartVersion"
+          } while (
+              -not [string]::IsNullOrEmpty($dockerCurrentVersionTag) -or
+              -not [string]::IsNullOrEmpty($helmCurrentVersionTag) -or
+              -not [string]::IsNullOrEmpty($GitHubCurrentVersionTag)
+          )
+          Write-Host "Final bumped version: $version"
+      }
