@@ -36,3 +36,50 @@ Adding './ja/Humanizer.resources.dll' to Root CA Authorities...\
 ./docker-entrypoint.sh: line 12: cd: /var/lib/rtls/sslCerts: No such file or directory\
 cp: cannot stat './ja/Humanizer.resources.dll': No such file or directory\
 chmod: cannot ac}
+
+
+#!/bin/bash
+
+# Import certs from the persistent volume
+oldDir=$(pwd)
+appData=$(printenv Aggregator_AppDataPath)
+caSource="$appData/sslCerts"
+caStore="/usr/local/share/ca-certificates"
+mkdir -p $caSource
+cd $caSource
+
+find . -type f -name "*" -print0 | while IFS= read -r -d '' file; do
+  cd $caSource
+  echo "Adding '$file' to Root CA Authorities..."
+  cp -f "$file" $caStore
+  cd $caStore
+  chmod 644 "$file"
+done
+
+update-ca-certificates
+
+cd $oldDir
+
+# Ensure the required environment variables are set
+if [ -z $Aggregator_AppDataPath ];
+then
+	echo "Aggregator_AppDataPath must be provided"
+    exit 1
+fi
+
+if [ -z $Aggregator_ApiAuthentication__authority ];
+then
+	echo "Aggregator_ApiAuthentication__authority must be provided"
+    exit 1
+fi
+
+if [ -z $Aggregator_ApplicationUrl ];
+then
+	echo "Aggregator_ApplicationUrl must be provided"
+    exit 1
+fi
+
+export version=$(cat version.txt)
+
+# Start up the service
+dotnet Aggregator.dll
